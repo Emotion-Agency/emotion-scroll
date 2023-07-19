@@ -1,1 +1,3 @@
-export * from './EmotionScroll'
+import EmotionScroll from './EmotionScroll'
+
+export default EmotionScroll
