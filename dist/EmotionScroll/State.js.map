@@ -1,0 +1,1 @@
+{"version":3,"file":"State.js","sourceRoot":"","sources":["../../src/EmotionScroll/State.ts"],"names":[],"mappings":";;;AAEA,MAAa,KAAK;IAOhB;QACE,IAAI,CAAC,WAAW,GAAG,KAAK,CAAA;QACxB,IAAI,CAAC,UAAU,GAAG,CAAC,CAAA;QACnB,IAAI,CAAC,kBAAkB,GAAG,KAAK,CAAA;QAC/B,IAAI,CAAC,QAAQ,GAAG,CAAC,CAAA;QACjB,IAAI,CAAC,QAAQ,GAAG,KAAK,CAAA;IACvB,CAAC;CACF;AAdD,sBAcC"}
