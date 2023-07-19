@@ -10,6 +10,8 @@ function createConfig(env) {
       path: path.resolve(__dirname, 'dist'),
       libraryTarget: 'umd',
       clean: true,
+      library: '@emotion-agency/emotion-scroll',
+      globalObject: 'this',
     },
     resolve: {
       extensions: ['.js', '.ts'],
