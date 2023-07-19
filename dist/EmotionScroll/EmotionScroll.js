@@ -4,15 +4,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const virtual_scroll_1 = __importDefault(require("virtual-scroll"));
-const ssr_window_1 = require("ssr-window");
+const window_ssr_1 = require("../window-ssr");
 const utils_1 = require("@emotionagency/utils");
 const tinyemitter_1 = __importDefault(require("tiny-emitter/dist/tinyemitter"));
 const opts_1 = require("./opts");
 const keyCodes_1 = require("./keyCodes");
 const State_1 = require("./State");
 const Scrollbar_1 = __importDefault(require("./Scrollbar"));
-const window = (0, ssr_window_1.getWindow)();
-const document = (0, ssr_window_1.getDocument)();
+const window = (0, window_ssr_1.getWindow)();
+const document = (0, window_ssr_1.getDocument)();
 class EmotionScroll {
     constructor(opts) {
         this._disabled = false;

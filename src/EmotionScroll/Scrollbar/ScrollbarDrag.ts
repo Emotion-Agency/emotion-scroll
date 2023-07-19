@@ -1,7 +1,7 @@
-import { clamp } from '@emotionagency/utils'
-import { getWindow, getDocument } from 'ssr-window'
+import {clamp} from '@emotionagency/utils'
+import {getWindow, getDocument} from '../../window-ssr'
 
-import { IState } from '../types'
+import {IState} from '../types'
 
 type TEl = HTMLElement | Element | null
 

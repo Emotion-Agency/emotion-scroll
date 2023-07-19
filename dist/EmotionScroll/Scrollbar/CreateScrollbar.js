@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateScrollbar = void 0;
-const ssr_window_1 = require("ssr-window");
-const document = (0, ssr_window_1.getDocument)();
+const window_ssr_1 = require("../../window-ssr");
+const document = (0, window_ssr_1.getDocument)();
 class CreateScrollbar {
     create() {
         this.scrollbar = document.createElement('div');

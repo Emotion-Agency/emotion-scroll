@@ -1,13 +1,13 @@
 import VirtualScroll from 'virtual-scroll'
-import { getWindow, getDocument } from 'ssr-window'
+import {getWindow, getDocument} from '../window-ssr'
 
-import { raf, resize, clamp, lerp } from '@emotionagency/utils'
+import {raf, resize, clamp, lerp} from '@emotionagency/utils'
 import Emitter from 'tiny-emitter/dist/tinyemitter'
 
-import { IEventArgs, IOpts, IState } from './types'
-import { getOpts } from './opts'
-import { keyCodes } from './keyCodes'
-import { State } from './State'
+import {IEventArgs, IOpts, IState} from './types'
+import {getOpts} from './opts'
+import {keyCodes} from './keyCodes'
+import {State} from './State'
 import Scrollbar from './Scrollbar'
 
 const window = getWindow()
@@ -122,7 +122,7 @@ export default class EmotionScroll {
   }
 
   private setupVirtualScroll() {
-    this.vs = new VirtualScroll({ ...this.opts, useKeyboard: false })
+    this.vs = new VirtualScroll({...this.opts, useKeyboard: false})
 
     this.vs.on((e: WheelEvent) => {
       if (this.disabled) {

@@ -1,4 +1,4 @@
-import { getDocument } from 'ssr-window'
+import {getDocument} from '../../window-ssr'
 
 const document = getDocument()
 

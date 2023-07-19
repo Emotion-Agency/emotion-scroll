@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const ssr_window_1 = require("ssr-window");
+const window_ssr_1 = require("../../window-ssr");
 const CreateScrollbar_1 = require("./CreateScrollbar");
 const Inactivity_1 = require("./Inactivity");
 const ScrollbarDrag_1 = require("./ScrollbarDrag");
-const window = (0, ssr_window_1.getWindow)();
-const document = (0, ssr_window_1.getDocument)();
+const window = (0, window_ssr_1.getWindow)();
+const document = (0, window_ssr_1.getDocument)();
 class Scrollbar {
     constructor($el, state, raf) {
         this.$el = $el;

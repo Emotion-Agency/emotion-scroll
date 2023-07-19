@@ -1,5 +1,5 @@
-import { getDocument } from 'ssr-window'
-import { IOpts } from './types'
+import {getDocument} from '../window-ssr'
+import {IOpts} from './types'
 
 const document = getDocument()
 

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOpts = void 0;
-const ssr_window_1 = require("ssr-window");
-const document = (0, ssr_window_1.getDocument)();
+const window_ssr_1 = require("../window-ssr");
+const document = (0, window_ssr_1.getDocument)();
 const getOpts = (opts) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     return {

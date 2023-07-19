@@ -1,9 +1,9 @@
-import { getWindow, getDocument } from 'ssr-window'
+import {getWindow, getDocument} from '../../window-ssr'
 
-import { TRAF, IState } from '../types'
-import { CreateScrollbar, TCreateScrollbar } from './CreateScrollbar'
-import { Inactivity, TInactivity } from './Inactivity'
-import { ScrollbarDrag, TScrollbarDrag } from './ScrollbarDrag'
+import {TRAF, IState} from '../types'
+import {CreateScrollbar, TCreateScrollbar} from './CreateScrollbar'
+import {Inactivity, TInactivity} from './Inactivity'
+import {ScrollbarDrag, TScrollbarDrag} from './ScrollbarDrag'
 
 const window = getWindow()
 const document = getDocument()
