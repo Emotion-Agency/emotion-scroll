@@ -1,9 +1,21 @@
 {
   "name": "@emotionagency/emotion-scroll",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A library that animates the native scroll value using Virtual Scroll and custom scrollbar",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "js",
+    "utilities",
+    "javascript",
+    "smoothscroll",
+    "scrollbar",
+    "virtual scroll",
+    "scroll"
+  ],
   "scripts": {
     "build": "webpack",
     "pub": "npm run build && npm version patch && npm publish"

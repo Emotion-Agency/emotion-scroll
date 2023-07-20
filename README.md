@@ -41,6 +41,9 @@ scroll.destroy()
 | `stepSize`                | `number`| `1`                |  A coefficient that affects the distance that will be scrolled at one time. The smaller the coefficient, the shorter the distance.
 | `breakpoint`                | `number`| `null`                |  If you pass a numeric value here, the smooth scroll will work until this breakpoint.
 | `saveScrollPosition`   | `boolean`          | `false`                |  Saving scroll position after page reload
+| `disabled`   | `boolean`          | `false`                |  Disabling scroll
+| `useKeyboard`   | `boolean`          | `true`                |  Ability to scroll the page using the keys (tab, space, arrows)
+| `maxScrollDelta`   | `number`          | `120`                |  What is the maximum number of pixels that can be scrolled in one scroll of the mouse wheel
 
 
 
