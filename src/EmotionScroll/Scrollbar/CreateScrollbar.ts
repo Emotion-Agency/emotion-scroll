@@ -23,7 +23,12 @@ export class CreateScrollbar {
       return
     }
 
-    document.body.appendChild(this.scrollbar)
+    if (!$el.parentElement) {
+      document.body.appendChild(this.scrollbar)
+      return
+    }
+
+    $el.appendChild(this.scrollbar)
   }
 
   destroy(): void {
