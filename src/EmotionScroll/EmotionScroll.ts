@@ -19,13 +19,13 @@ export default class EmotionScroll {
   private emitter: any
   private opts: IOpts
 
-  private state: IState
+  public state: IState
   private _disabled = false
-  private isMobile = false
-  private scrollTop = 0
+  public isMobile = false
+  public scrollTop = 0
 
   private _raf: any
-  private max = 0
+  public max = 0
   private min = 0
 
   constructor(opts: IOpts) {

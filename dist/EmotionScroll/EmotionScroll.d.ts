@@ -1,15 +1,15 @@
-import { IEventArgs, IOpts } from './types';
+import { IEventArgs, IOpts, IState } from './types';
 export default class EmotionScroll {
     private vs;
     private scrollbar;
     private emitter;
     private opts;
-    private state;
+    state: IState;
     private _disabled;
-    private isMobile;
-    private scrollTop;
+    isMobile: boolean;
+    scrollTop: number;
     private _raf;
-    private max;
+    max: number;
     private min;
     constructor(opts: IOpts);
     private bounds;
