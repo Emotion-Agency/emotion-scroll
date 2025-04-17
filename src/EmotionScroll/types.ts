@@ -1,6 +1,6 @@
 export type TFunc = () => void
 
-export type TRAF = { on: (cb: TFunc) => void; off: (cb: TFunc) => void }
+export type TRAF = {on: (cb: TFunc) => void; off: (cb: TFunc) => void}
 
 export interface IOpts {
   el?: HTMLElement
@@ -25,6 +25,7 @@ export interface IState {
   isScrollbarVisible?: boolean
   position?: number
   disabled?: boolean
+  velocity?: number
 }
 
 export interface IEventArgs {
@@ -32,4 +33,12 @@ export interface IEventArgs {
   direction: 1 | -1
   velocity: number
   progress: number
+}
+
+export interface IVirtualWheelEvent {
+  deltaX: number
+  deltaY: number
+  x: number
+  y: number
+  originalEvent: WheelEvent
 }

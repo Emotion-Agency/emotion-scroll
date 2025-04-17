@@ -1,4 +1,4 @@
-import { IState } from './types'
+import {IState} from './types'
 
 export class State implements IState {
   isScrolling?: boolean
@@ -6,12 +6,13 @@ export class State implements IState {
   isScrollbarVisible?: boolean
   position?: number
   disabled?: boolean
-
+  velocity?: number
   constructor() {
     this.isScrolling = false
     this.vsPosition = 0
     this.isScrollbarVisible = false
     this.position = 0
     this.disabled = false
+    this.velocity = 0
   }
 }

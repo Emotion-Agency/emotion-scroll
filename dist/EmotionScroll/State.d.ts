@@ -5,5 +5,6 @@ export declare class State implements IState {
     isScrollbarVisible?: boolean;
     position?: number;
     disabled?: boolean;
+    velocity?: number;
     constructor();
 }

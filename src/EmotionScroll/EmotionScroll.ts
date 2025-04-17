@@ -4,7 +4,7 @@ import {getWindow, getDocument} from '../window-ssr'
 import {raf, resize, clamp, lerp} from '@emotionagency/utils'
 import Emitter from 'tiny-emitter/dist/tinyemitter'
 
-import {IEventArgs, IOpts, IState} from './types'
+import {IEventArgs, IOpts, IState, IVirtualWheelEvent} from './types'
 import {getOpts} from './opts'
 import {keyCodes} from './keyCodes'
 import {State} from './State'
@@ -12,6 +12,14 @@ import Scrollbar from './Scrollbar'
 
 const window = getWindow()
 const document = getDocument()
+
+function isInsideScrollable(el: HTMLElement | null): boolean {
+  while (el) {
+    if (el.dataset.scrollIgnore) return true
+    el = el.parentElement
+  }
+  return false
+}
 
 export default class EmotionScroll {
   private vs: typeof VirtualScroll.prototype
@@ -106,8 +114,12 @@ export default class EmotionScroll {
   set disabled(val: boolean) {
     this._disabled = val
     this.state.disabled = val
+
     if (val) {
       this.opts.el.classList.add('e-fixed')
+      this.state.vsPosition = this.scrollTop
+      this.state.position = this.scrollTop
+      this.state.velocity = 0
     } else {
       this.opts.el.classList.remove('e-fixed')
     }
@@ -124,8 +136,14 @@ export default class EmotionScroll {
   private setupVirtualScroll() {
     this.vs = new VirtualScroll({...this.opts, useKeyboard: false})
 
-    this.vs.on((e: WheelEvent) => {
+    this.vs.on((e: IVirtualWheelEvent) => {
       if (this.disabled) {
+        return
+      }
+
+      console.log(e)
+
+      if (isInsideScrollable(e.originalEvent.target as HTMLElement)) {
         return
       }
 
@@ -166,12 +184,13 @@ export default class EmotionScroll {
       this.opts.friction
     )
     this.state.position = Math.round(this.state.position * 100) / 100
+    this.state.velocity = this.state.vsPosition - this.state.position
 
     if (this.state.isScrolling) {
       this.emitter.emit('update', {
         position: this.state.position,
         direction: this.state.vsPosition > this.state.position ? 1 : -1,
-        velocity: this.state.vsPosition - this.state.position,
+        velocity: this.state.velocity,
         progress: this.state.position / this.max,
       } as IEventArgs)
     }

@@ -25,10 +25,18 @@ export interface IState {
     isScrollbarVisible?: boolean;
     position?: number;
     disabled?: boolean;
+    velocity?: number;
 }
 export interface IEventArgs {
     position: number;
     direction: 1 | -1;
     velocity: number;
     progress: number;
+}
+export interface IVirtualWheelEvent {
+    deltaX: number;
+    deltaY: number;
+    x: number;
+    y: number;
+    originalEvent: WheelEvent;
 }
