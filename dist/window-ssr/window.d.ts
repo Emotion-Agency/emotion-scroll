@@ -1,3 +1,4 @@
+/// <reference types="node" />
 declare const ssrWindow: {
     document: {
         body: {};

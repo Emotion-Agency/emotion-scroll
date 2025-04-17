@@ -141,8 +141,6 @@ export default class EmotionScroll {
         return
       }
 
-      console.log(e)
-
       if (isInsideScrollable(e.originalEvent.target as HTMLElement)) {
         return
       }

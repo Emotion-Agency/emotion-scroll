@@ -1,46 +1,19 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
-    "target": "ES6",
-    "lib": ["DOM","DOM.Iterable","ES2015", "ESNext", "ScriptHost"],
-    "noImplicitAny": false,
-    // "strictNullChecks": true,
-    "noUnusedLocals": true, 
-    "sourceMap": true,
-    "allowJs": true,
-    "checkJs": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true, 
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "types": ["node"],
-    "typeRoots": [
-      "node_modules/@types"
-    ],
     "declaration": true,
-    "downlevelIteration": true,
-    "baseUrl": "src/js",
-    "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@core/*": [
-        "./core/*"
-      ]
-    }
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": false
   },
-  "baseUrl": "/src/js",
   "include": [
-    "./**/*.ts"
+    "src"
   ],
   "exclude": [
     "node_modules",
-    "**/*.d.ts",
-    "webpack.cofing.js",
-    "**/*.test.ts",
-    "./libs/*"
+    "dist"
   ]
 }
