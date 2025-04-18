@@ -14,7 +14,7 @@
     "./types": "./dist/index.d.ts"
   },
   "files": [
-    "dist"
+    "./dist"
   ],
   "keywords": [
     "js",
@@ -46,7 +46,7 @@
     "vite": "^5.0.0"
   },
   "dependencies": {
-    "@emotionagency/utils": "^1.1.3",
+    "@emotionagency/utils": "^2.0.1",
     "tiny-emitter": "^2.1.0",
     "virtual-scroll": "^2.1.1"
   }
