@@ -1,6 +1,6 @@
 {
   "name": "@emotionagency/emotion-scroll",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A library that animates the native scroll value using Virtual Scroll and custom scrollbar",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
