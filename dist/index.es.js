@@ -199,7 +199,7 @@ var M = { exports: {} };
   });
 })(M);
 var z = M.exports;
-const C = /* @__PURE__ */ q(z), I = b(), K = (t) => ({
+const C = /* @__PURE__ */ q(z), I = b(), R = (t) => ({
   el: (t == null ? void 0 : t.el) ?? I.documentElement,
   touchMultiplier: (t == null ? void 0 : t.touchMultiplier) ?? 3.8,
   firefoxMultiplier: (t == null ? void 0 : t.firefoxMultiplier) ?? 40,
@@ -213,7 +213,8 @@ const C = /* @__PURE__ */ q(z), I = b(), K = (t) => ({
   disabled: (t == null ? void 0 : t.disabled) ?? !1,
   raf: (t == null ? void 0 : t.raf) ?? null,
   maxScrollDelta: (t == null ? void 0 : t.maxScrollDelta) ?? 120,
-  saveScrollPosition: (t == null ? void 0 : t.saveScrollPosition) ?? !1
+  saveScrollPosition: (t == null ? void 0 : t.saveScrollPosition) ?? !1,
+  autoRaf: (t == null ? void 0 : t.autoRaf) ?? !0
 }), m = {
   UP: "ArrowUp",
   DOWN: "ArrowDown",
@@ -223,7 +224,7 @@ const C = /* @__PURE__ */ q(z), I = b(), K = (t) => ({
   HOME: "Home",
   END: "End"
 };
-class R {
+class K {
   constructor() {
     i(this, "isScrolling");
     i(this, "vsPosition");
@@ -422,13 +423,13 @@ class tt {
     i(this, "_raf");
     i(this, "max", 0);
     i(this, "min", 0);
-    this.opts = K(e), this.state = new R(), this._raf = this.opts.raf || k, this.emitter = new C(), this.init();
+    this.opts = R(e), this.state = new K(), this._raf = this.opts.raf || k, this.emitter = new C(), this.init();
   }
   bounds() {
     this.update = this.update.bind(this), this.onKeyDown = this.onKeyDown.bind(this), this.onResize = this.onResize.bind(this);
   }
   init() {
-    this.bounds(), this.opts.saveScrollPosition && (this.disabled = !0, this.opts.el.scrollTop = +u.localStorage.getItem("ess") || 0, this.scrollTop = this.opts.el.scrollTop, this.state.vsPosition = this.opts.el.scrollTop, this.state.position = this.opts.el.scrollTop), this.disabled = this.opts.disabled, this.opts.useKeyboard && u.addEventListener("keydown", this.onKeyDown, !1), x.on(this.onResize), this._raf.on(this.update);
+    this.bounds(), this.opts.saveScrollPosition && (this.disabled = !0, this.opts.el.scrollTop = +u.localStorage.getItem("ess") || 0, this.scrollTop = this.opts.el.scrollTop, this.state.vsPosition = this.opts.el.scrollTop, this.state.position = this.opts.el.scrollTop), this.disabled = this.opts.disabled, this.opts.useKeyboard && u.addEventListener("keydown", this.onKeyDown, !1), x.on(this.onResize), this.opts.autoRaf && this._raf.on(this.update);
   }
   onResize() {
     this.opts.breakpoint && (this.isMobile = u.innerWidth < this.opts.breakpoint), this.isMobile && (this.vs && this.vs.destroy(), this.vs = null, this.scrollbar && this.scrollbar.destroy(), this.scrollbar = null), !this.isMobile && !this.vs && this.setupVirtualScroll(), !this.isMobile && !this.scrollbar && this.opts.scrollbar && (this.scrollbar = new Y(this.opts.el, this.state, this._raf));

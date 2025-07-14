@@ -22,7 +22,7 @@ export default class EmotionScroll {
     private get canScroll();
     private setupVirtualScroll;
     on(cb: (vars: IEventArgs) => any): void;
-    private update;
+    update(): void;
     private onKeyDown;
     reset(): void;
     destroy(): void;

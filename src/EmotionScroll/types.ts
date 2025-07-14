@@ -15,6 +15,7 @@ export interface IOpts {
   useKeyboard?: boolean
   disabled?: boolean
   raf?: TRAF
+  autoRaf?: boolean
   maxScrollDelta?: number
   saveScrollPosition?: boolean
 }

@@ -71,7 +71,9 @@ export default class EmotionScroll {
 
     resize.on(this.onResize)
 
-    this._raf.on(this.update)
+    if (this.opts.autoRaf) {
+      this._raf.on(this.update)
+    }
   }
 
   private onResize() {
@@ -167,7 +169,7 @@ export default class EmotionScroll {
     })
   }
 
-  private update() {
+  public update() {
     this.detectScrolling()
 
     this.max = this.maxValue

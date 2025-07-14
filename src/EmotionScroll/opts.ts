@@ -19,5 +19,6 @@ export const getOpts = (opts: IOpts | undefined): IOpts => {
     raf: opts?.raf ?? null,
     maxScrollDelta: opts?.maxScrollDelta ?? 120,
     saveScrollPosition: opts?.saveScrollPosition ?? false,
+    autoRaf: opts?.autoRaf ?? true,
   }
 }
