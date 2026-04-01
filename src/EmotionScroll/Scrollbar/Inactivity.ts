@@ -1,40 +1,24 @@
 export class Inactivity {
-  inactiveDelay = 1
-  timer = 0
-  ticker: ReturnType<typeof setInterval>
-  interval: ReturnType<typeof setInterval>
+  private timer: ReturnType<typeof setTimeout> | null = null
 
-  constructor(readonly cb: (isActive: boolean) => void) {
-    this.detect = this.detect.bind(this)
-    this.intervals()
-  }
+  constructor(
+    private readonly cb: (isActive: boolean) => void,
+    private readonly delay = 1000
+  ) {}
 
-  get compare(): boolean {
-    if (this.timer >= this.inactiveDelay) {
-      return false
-    }
-    return true
-  }
-
-  detect(): void {
-    this.cb(this.compare)
-  }
-
-  intervals(): void {
-    this.ticker = setInterval(() => {
-      this.timer++
-    }, 1000)
-    this.interval = setInterval(this.detect, 120)
-  }
-
-  reset(): void {
-    this.timer = 0
+  show(): void {
+    if (this.timer !== null) clearTimeout(this.timer)
+    this.cb(true)
+    this.timer = setTimeout(() => {
+      this.cb(false)
+      this.timer = null
+    }, this.delay)
   }
 
   destroy(): void {
-    clearInterval(this.ticker)
-    clearInterval(this.interval)
+    if (this.timer !== null) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
   }
 }
-
-export type TInactivity = typeof Inactivity.prototype

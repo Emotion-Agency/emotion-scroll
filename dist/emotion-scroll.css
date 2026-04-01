@@ -1,0 +1,133 @@
+/* ==========================================================================
+   emotion-scroll — Base styles
+
+   Customize with CSS variables:
+
+   Scrollbar track:
+     --es-scrollbar-width          Track width                 (default: 12px)
+     --es-scrollbar-height         Track height                (default: 100%)
+     --es-scrollbar-top            Track top offset            (default: 0)
+     --es-scrollbar-right          Track right offset          (default: 0)
+     --es-scrollbar-padding        Track padding               (default: 2px)
+     --es-scrollbar-bg             Track background            (default: transparent)
+     --es-scrollbar-z-index        Track z-index               (default: 100000)
+
+   Thumb:
+     --es-thumb-width              Thumb width                 (default: 6px)
+     --es-thumb-width-hover        Thumb width on hover        (default: 10px)
+     --es-thumb-bg                 Thumb color                 (default: #6b6b6b)
+     --es-thumb-bg-hover           Thumb hover/active color    (default: #8b5cf6)
+     --es-thumb-border-radius      Thumb border radius         (default: 7px)
+     --es-thumb-border-radius-hover Thumb radius on hover      (default: 10px)
+     --es-thumb-opacity            Thumb visible opacity       (default: 0.7)
+   ========================================================================== */
+
+/* --- Scroll container --- */
+
+.e-fixed {
+  overflow: hidden !important;
+}
+
+/* --- Hide native scrollbar --- */
+
+.es-smooth::-webkit-scrollbar {
+  display: none;
+}
+
+.es-smooth {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* --- Prevent pointer events on iframes during scroll --- */
+
+.es-scrolling iframe {
+  pointer-events: none;
+}
+
+/* --- Scrollbar track --- */
+
+.scrollbar {
+  position: fixed;
+  top: var(--es-scrollbar-top, 0);
+  right: var(--es-scrollbar-right, 0);
+  z-index: var(--es-scrollbar-z-index, 100000);
+  width: var(--es-scrollbar-width, 12px);
+  height: var(--es-scrollbar-height, 100%);
+  padding: var(--es-scrollbar-padding, 2px);
+  padding-left: 0;
+  background: var(--es-scrollbar-bg, transparent);
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.scrollbar.hidden {
+  display: none;
+}
+
+/* --- Scrollbar thumb --- */
+
+.scrollbar__thumb {
+  display: block;
+  position: relative;
+  float: right;
+  width: var(--es-thumb-width, 6px);
+  border-radius: var(--es-thumb-border-radius, 7px);
+  background: var(--es-thumb-bg, #6b6b6b);
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity;
+  transition:
+    width 0.2s ease,
+    opacity 0.3s ease,
+    border-radius 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Visible when scrolling */
+.scrollbar__thumb.scrolling {
+  opacity: var(--es-thumb-opacity, 0.7);
+}
+
+/* Hover on track */
+.scrollbar:hover .scrollbar__thumb {
+  width: var(--es-thumb-width-hover, 10px);
+  opacity: var(--es-thumb-opacity, 0.7);
+  border-radius: var(--es-thumb-border-radius-hover, 10px);
+  background-color: var(--es-thumb-bg-hover, #8b5cf6);
+}
+
+/* Dragging — higher specificity to override hover */
+.scrollbar .scrollbar__thumb.active {
+  width: var(--es-thumb-width-hover, 10px);
+  opacity: var(--es-thumb-opacity, 0.7);
+  border-radius: var(--es-thumb-border-radius-hover, 10px);
+  background-color: var(--es-thumb-bg-hover, #8b5cf6);
+}
+
+/* --- Horizontal orientation --- */
+
+.scrollbar.scrollbar--horizontal {
+  top: auto;
+  right: auto;
+  bottom: var(--es-scrollbar-right, 0);
+  left: var(--es-scrollbar-top, 0);
+  width: var(--es-scrollbar-height, 100%);
+  height: var(--es-scrollbar-width, 12px);
+  padding: var(--es-scrollbar-padding, 2px);
+  padding-top: 0;
+}
+
+.scrollbar--horizontal .scrollbar__thumb {
+  float: none;
+  width: auto;
+  height: var(--es-thumb-width, 6px);
+}
+
+.scrollbar--horizontal:hover .scrollbar__thumb,
+.scrollbar--horizontal .scrollbar__thumb.active {
+  width: auto;
+  height: var(--es-thumb-width-hover, 10px);
+}

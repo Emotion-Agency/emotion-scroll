@@ -1,34 +1,20 @@
-import { IState } from '../types';
-type TEl = HTMLElement | Element | null;
-interface IEvent {
-    [key: string]: any;
-}
-interface IOptions {
-    $el: TEl;
+import type { IScrollController } from '../types';
+interface ScrollbarElements {
     $scrollbar: HTMLElement;
     $thumb: HTMLElement;
 }
-interface ISizes {
-    height: number;
-    max: number;
-}
 export declare class ScrollbarDrag {
-    options: IOptions;
-    readonly state?: IState;
-    constructor(options: IOptions, state?: IState);
-    events: {
-        start: string[];
-        move: string[];
-        end: string[];
-    };
-    bounds(): void;
-    init(): void;
-    get sizes(): ISizes;
-    compute(o: number): void;
-    update(e: IEvent): void;
-    start(): void;
-    end(): void;
+    private readonly elements;
+    private readonly controller;
+    constructor(elements: ScrollbarElements, controller: IScrollController);
+    private get isHorizontal();
+    private init;
+    /** Map a pointer position (relative to track) to a scroll target. */
+    private pointerToScroll;
+    private readonly onTrackClick;
+    private readonly onStart;
+    private readonly onMove;
+    private readonly onEnd;
     destroy(): void;
 }
-export type TScrollbarDrag = typeof ScrollbarDrag.prototype;
 export {};

@@ -1,14 +1,8 @@
 export declare class Inactivity {
-    readonly cb: (isActive: boolean) => void;
-    inactiveDelay: number;
-    timer: number;
-    ticker: ReturnType<typeof setInterval>;
-    interval: ReturnType<typeof setInterval>;
-    constructor(cb: (isActive: boolean) => void);
-    get compare(): boolean;
-    detect(): void;
-    intervals(): void;
-    reset(): void;
+    private readonly cb;
+    private readonly delay;
+    private timer;
+    constructor(cb: (isActive: boolean) => void, delay?: number);
+    show(): void;
     destroy(): void;
 }
-export type TInactivity = typeof Inactivity.prototype;

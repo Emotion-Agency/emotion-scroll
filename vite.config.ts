@@ -1,5 +1,18 @@
 import {defineConfig} from 'vite'
 import path from 'path'
+import {readFileSync, writeFileSync, mkdirSync} from 'fs'
+
+function copyCss() {
+  return {
+    name: 'copy-css',
+    closeBundle() {
+      const src = path.resolve(__dirname, 'src/styles/emotion-scroll.css')
+      const dest = path.resolve(__dirname, 'dist/emotion-scroll.css')
+      mkdirSync(path.dirname(dest), {recursive: true})
+      writeFileSync(dest, readFileSync(src))
+    },
+  }
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,13 +31,15 @@ export default defineConfig({
           'tiny-emitter': 'TinyEmitter',
           'virtual-scroll': 'VirtualScroll',
           '@emotionagency/utils': 'EmotionUtils',
+          'ssr-window': 'SsrWindow',
         },
       },
-      external: ['tiny-emitter', 'virtual-scroll', '@emotionagency/utils'],
+      external: ['tiny-emitter', 'virtual-scroll', '@emotionagency/utils', 'ssr-window'],
     },
     emptyOutDir: true,
   },
   resolve: {
     extensions: ['.ts', '.js'],
   },
+  plugins: [copyCss()],
 })

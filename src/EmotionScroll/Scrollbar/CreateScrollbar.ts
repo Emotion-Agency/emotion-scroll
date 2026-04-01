@@ -1,29 +1,27 @@
-import {getDocument} from '../../window-ssr'
+import {getDocument} from 'ssr-window'
 
 const document = getDocument()
 
 export class CreateScrollbar {
   scrollbar: HTMLElement
 
-  create(): HTMLElement {
+  create(isHorizontal = false): HTMLElement {
     this.scrollbar = document.createElement('div')
-    this.scrollbar.innerHTML = '<span class="scrollbar__thumb"></span>'
-
-    if (document.querySelector('.scrollbar')) {
-      this.scrollbar.classList.add('scrollbar', 'block-scrollbar')
-      return this.scrollbar
-    }
+    const thumb = document.createElement('span')
+    thumb.className = 'scrollbar__thumb'
+    this.scrollbar.appendChild(thumb)
 
     this.scrollbar.classList.add('scrollbar')
+
+    if (isHorizontal) {
+      this.scrollbar.classList.add('scrollbar--horizontal')
+    }
+
     return this.scrollbar
   }
 
   append($el: HTMLElement | Element | null): void {
     if (!$el) {
-      return
-    }
-
-    if (!$el.parentElement) {
       document.body.appendChild(this.scrollbar)
       return
     }
@@ -32,8 +30,6 @@ export class CreateScrollbar {
   }
 
   destroy(): void {
-    this.scrollbar.parentElement.removeChild(this.scrollbar)
+    this.scrollbar.remove()
   }
 }
-
-export type TCreateScrollbar = typeof CreateScrollbar.prototype

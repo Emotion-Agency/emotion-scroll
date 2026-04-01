@@ -1,167 +1,247 @@
-A library that animates the native scroll value using Virtual Scroll and custom scrollbar
+# @emotionagency/emotion-scroll
 
-# Instalation
+Smooth scroll library with native scroll integration and custom scrollbar. Built on top of `virtual-scroll` for input normalization, with frame-rate independent animation and full CSS variable customization.
 
-`npm i @emotionagency/emotion-scroll`
+## Installation
 
-or
-
-`yarn add @emotionagency/emotion-scroll`
-
-# Usage
-
-Basic example
-
+```bash
+npm i @emotionagency/emotion-scroll
 ```
+
+## Quick start
+
+```js
 import EmotionScroll from '@emotionagency/emotion-scroll'
-
-const scroll = new EmotionScroll()
-```
-
-Destroy instance
-
-```
-import EmotionScroll from '@emotionagency/emotion-scroll'
+import '@emotionagency/emotion-scroll/css'
 
 const scroll = new EmotionScroll()
 
+// Listen to scroll events
+scroll.on('scroll', ({position, direction, velocity, progress}) => {
+  console.log({position, direction, velocity, progress})
+})
+
+// Scroll to a target
+scroll.scrollTo('#section-2', {offset: -100})
+
+// Cleanup
 scroll.destroy()
 ```
 
-## Instance options
+## Options
 
-| Option               | Type      | Default             | Description                                                                                                                       |
-| -------------------- | --------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `el`                 | `DOM el`  | `#scroll-container` | Scroll container element.                                                                                                         |
-| `touchMultiplier`    | `number`  | `3.8`               | Mutiply the touch action by this modifier to make scroll faster than finger movement (Virtual Scroll API).                        |
-| `firefoxMultiplier`  | `number`  | `40`                | Firefox on Windows needs a boost, since scrolling is very slow.                                                                   |
-| `preventTouch`       | `boolean` | `true`              | If true, automatically call e.preventDefault on touchMove.                                                                        |
-| `scrollbar`          | `boolean` | `true`              | Custom scrollbar.                                                                                                                 |
-| `friction`           | `number`  | `0.08`              | Factor that affects the speed and smoothness of the scroll animation.                                                             |
-| `stepSize`           | `number`  | `1`                 | A coefficient that affects the distance that will be scrolled at one time. The smaller the coefficient, the shorter the distance. |
-| `breakpoint`         | `number`  | `null`              | If you pass a numeric value here, the smooth scroll will work until this breakpoint.                                              |
-| `saveScrollPosition` | `boolean` | `false`             | Saving scroll position after page reload                                                                                          |
-| `disabled`           | `boolean` | `false`             | Disabling scroll                                                                                                                  |
-| `useKeyboard`        | `boolean` | `true`              | Ability to scroll the page using the keys (tab, space, arrows)                                                                    |
-| `maxScrollDelta`     | `number`  | `120`               | What is the maximum number of pixels that can be scrolled in one scroll of the mouse wheel                                        |
+| Option                 | Type                                   | Default                    | Description                                                      |
+| ---------------------- | -------------------------------------- | -------------------------- | ---------------------------------------------------------------- |
+| `el`                   | `HTMLElement`                          | `document.documentElement` | Scroll wrapper element                                           |
+| `content`              | `HTMLElement`                          | `el`                       | Content element for dimension tracking                           |
+| `orientation`          | `'vertical' \| 'horizontal'`           | `'vertical'`               | Scroll axis                                                      |
+| `gestureOrientation`   | `'vertical' \| 'horizontal' \| 'both'` | auto                       | Which gesture axes to capture                                    |
+| `smoothWheel`          | `boolean`                              | `true`                     | Enable smooth wheel scrolling                                    |
+| `syncTouch`            | `boolean`                              | `false`                    | Enable smooth touch scrolling with inertia                       |
+| `syncTouchLerp`        | `number`                               | `0.075`                    | Lerp factor for touch inertia animation                          |
+| `touchInertiaExponent` | `number`                               | `1.7`                      | Exponent for touch velocity inertia                              |
+| `lerp`                 | `number`                               | `0.1`                      | Lerp factor for scroll animation (0-1, higher = faster)          |
+| `duration`             | `number`                               | `undefined`                | Fixed animation duration in seconds (alternative to lerp)        |
+| `easing`               | `(t: number) => number`                | `undefined`                | Easing function, used with `duration`                            |
+| `touchMultiplier`      | `number`                               | `1`                        | Touch input multiplier                                           |
+| `wheelMultiplier`      | `number`                               | `1`                        | Wheel input multiplier                                           |
+| `maxScrollDelta`       | `number`                               | `120`                      | Max pixels per wheel event (prevents jarring jumps)              |
+| `scrollbar`            | `boolean`                              | `true`                     | Show custom scrollbar                                            |
+| `breakpoint`           | `number \| null`                       | `null`                     | Viewport width below which smooth scroll is disabled             |
+| `useKeyboardSmooth`    | `boolean`                              | `true`                     | Enable keyboard navigation (arrows, Page Up/Down, Home/End, Tab) |
+| `keyboardScrollStep`   | `number`                               | `120`                      | Arrow key scroll distance in pixels                              |
+| `disabled`             | `boolean`                              | `false`                    | Start in disabled state                                          |
+| `raf`                  | `{ on, off }`                          | `null`                     | Custom RAF instance. Uses `@emotionagency/utils` raf by default  |
+| `autoRaf`              | `boolean`                              | `true`                     | Auto-attach to RAF loop. Set `false` to call `raf()` manually    |
+| `autoResize`           | `boolean`                              | `true`                     | Auto-track size changes via ResizeObserver                       |
+| `saveScrollPosition`   | `boolean`                              | `false`                    | Persist scroll position in localStorage                          |
+| `prevent`              | `(node: HTMLElement) => boolean`       | `undefined`                | Callback to prevent smooth scroll on specific elements           |
+| `overscroll`           | `boolean`                              | `true`                     | Allow overscroll (native bounce) at boundaries                   |
+| `infinite`             | `boolean`                              | `false`                    | Enable infinite (looping) scroll                                 |
+| `passive`              | `boolean`                              | `false`                    | Use passive event listeners                                      |
+| `maxTouchInertia`      | `number`                               | `1000`                     | Max inertia delta after touch release                            |
 
-## Reset scroll position
+## Methods
 
-(for example, can be called when navigating between pages)
+### `scrollTo(target, options?)`
 
-```
-import EmotionScroll from '@emotionagency/emotion-scroll'
+Scroll to a target with animation.
 
-const scroll = new EmotionScroll()
+```js
+// Scroll to a pixel position
+scroll.scrollTo(500)
 
-scroll.reset()
-```
+// Scroll to an element
+scroll.scrollTo(document.getElementById('section'))
 
-## Scrolling hook
+// Scroll to a CSS selector
+scroll.scrollTo('#section-2')
 
-```
-import EmotionScroll from '@emotionagency/emotion-scroll'
+// Scroll to keywords
+scroll.scrollTo('top') // or 'start', 'left'
+scroll.scrollTo('bottom') // or 'end', 'right'
 
-const scroll = new EmotionScroll()
-
-scroll.on(({direction, position, progress, velocity}) => {
-  console.log({direction, position, progress, velocity})
+// With options
+scroll.scrollTo('#section', {
+  offset: -100, // additional offset in px
+  immediate: true, // jump without animation
+  duration: 1.5, // override animation duration
+  easing: t => t, // override easing
+  lerp: 0.05, // override lerp
+  lock: true, // lock scroll until animation completes
+  force: true, // scroll even when stopped
+  onStart: instance => {},
+  onComplete: instance => {},
 })
 ```
 
-## Disable scroll over element
+### `on(event, callback)` / `off(event, callback)`
 
-When you need to disable scroll over element, you can use the
+Subscribe/unsubscribe to events.
 
-```
-data-scroll-ignore="true"
-```
-
-attribute to the element.
-
-## Recomended styles
-
-### Scroll Container
-
-```
-.e-fixed {
-  overflow: hidden !important;
+```js
+const handler = ({position, direction, velocity, progress}) => {
+  console.log(position)
 }
 
-#scroll-container {
-  will-change: scroll-position;
-  overflow: hidden;
-  @media (max-width: $br1) {
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
+scroll.on('scroll', handler)
+scroll.off('scroll', handler)
+
+// Virtual scroll events (raw wheel/touch input)
+scroll.on('virtual-scroll', ({deltaX, deltaY, event}) => {
+  console.log(deltaX, deltaY)
+})
+```
+
+### `start()` / `stop()`
+
+Programmatically enable/disable scrolling.
+
+```js
+// Disable (adds .e-fixed class)
+scroll.stop()
+
+// Re-enable
+scroll.start()
+```
+
+### `reset()`
+
+Reset scroll position to 0.
+
+```js
+scroll.reset()
+```
+
+### `resize()`
+
+Manually trigger a resize recalculation.
+
+```js
+scroll.resize()
+```
+
+### `destroy()`
+
+Clean up all event listeners and DOM elements.
+
+```js
+scroll.destroy()
+```
+
+## Properties
+
+| Property         | Type                            | Description                                             |
+| ---------------- | ------------------------------- | ------------------------------------------------------- |
+| `animatedScroll` | `number`                        | Current animated scroll position                        |
+| `targetScroll`   | `number`                        | Target scroll position                                  |
+| `velocity`       | `number`                        | Current scroll velocity                                 |
+| `direction`      | `1 \| -1 \| 0`                  | Scroll direction                                        |
+| `progress`       | `number`                        | Scroll progress (0 to 1)                                |
+| `limit`          | `number`                        | Maximum scrollable distance                             |
+| `scroll`         | `number`                        | Scroll position (with modulo wrapping in infinite mode) |
+| `isScrolling`    | `false \| 'native' \| 'smooth'` | Current scrolling state                                 |
+| `isStopped`      | `boolean`                       | Whether scrolling is stopped                            |
+| `isHorizontal`   | `boolean`                       | Whether orientation is horizontal                       |
+| `isMobile`       | `boolean`                       | Whether below breakpoint                                |
+
+## Styles
+
+Import the built-in CSS:
+
+```js
+import '@emotionagency/emotion-scroll/css'
+```
+
+This provides base styles for the scroll container, native scrollbar hiding, and the custom scrollbar with sensible defaults.
+
+### CSS variables
+
+Override these variables to customize the scrollbar appearance:
+
+```css
+:root {
+  /* Scrollbar track */
+  --es-scrollbar-width: 12px;
+  --es-scrollbar-height: 100%; /* set to e.g. 300px for a shorter track */
+  --es-scrollbar-top: 0;
+  --es-scrollbar-right: 0;
+  --es-scrollbar-padding: 2px;
+  --es-scrollbar-bg: transparent;
+  --es-scrollbar-z-index: 100000;
+
+  /* Thumb */
+  --es-thumb-width: 6px;
+  --es-thumb-width-hover: 10px;
+  --es-thumb-bg: #6b6b6b;
+  --es-thumb-bg-hover: #8b5cf6;
+  --es-thumb-border-radius: 7px;
+  --es-thumb-border-radius-hover: 10px;
+  --es-thumb-opacity: 0.7;
 }
 ```
 
-### Scrollbar
+### CSS classes applied automatically
 
+| Class           | Applied to     | When                            |
+| --------------- | -------------- | ------------------------------- |
+| `.es-smooth`    | scroll element | always (hides native scrollbar) |
+| `.es-scrolling` | scroll element | during scroll animation         |
+| `.e-fixed`      | scroll element | when `stop()` is called         |
+
+## Prevent smooth scroll on elements
+
+Add a data attribute to elements that should use native scrolling (e.g., modals, dropdowns, nested scrollable areas):
+
+```html
+<div data-scroll-ignore>
+  <!-- native scroll inside here -->
+</div>
 ```
-/* Hide scrollbar for Chrome, Safari and Opera */
-#scroll-container::-webkit-scrollbar {
-  display: none;
-}
 
-/* Hide scrollbar for IE, Edge and Firefox */
-#scroll-container {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
+Or use the `prevent` callback:
 
-.scrollbar {
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: 10000000 !important;
-  height: 100vh;
-  height: 100dvh;
-  width: 12px;
-  user-select: none;
-  overflow: hidden;
-  padding: 2px;
-  padding-left: 0px;
-  @media screen and (min-width: 960px)) {
-    &:hover {
-      .scrollbar__thumb {
-        width: 10px;
-        opacity: 0.7;
-        border-radius: 10px;
-        background-color: #9047ff;
-      }
-    }
-  }
-  &.hidden {
-    display: none;
-  }
-}
-
-.scrollbar__thumb {
-  width: 6px;
-  border-radius: 7px;
-  pointer-events: none;
-  height: 100px;
-  background: #6b6b6b;
-  display: block;
-  position: relative;
-  user-select: none;
-  transition: width 0.2s ease, opacity 0.3s ease, border-radius 0.3s ease,
-    background-color 0.3s ease;
-  right: 0;
-  opacity: 0;
-  float: right;
-  &.scrolling {
-    opacity: 0.7;
-  }
-  &.active {
-    width: 10px;
-    opacity: 0.7;
-    border-radius: 10px;
-    background-color: #9047ff;
-  }
-}
-
+```js
+const scroll = new EmotionScroll({
+  prevent: node => node.classList.contains('modal'),
+})
 ```
+
+## Manual RAF
+
+For integration with an external render loop:
+
+```js
+const scroll = new EmotionScroll({autoRaf: false})
+
+function animate() {
+  scroll.update()
+  requestAnimationFrame(animate)
+}
+
+animate()
+```
+
+## License
+
+MIT

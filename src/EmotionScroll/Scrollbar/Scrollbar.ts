@@ -1,117 +1,135 @@
-import {getWindow, getDocument} from '../../window-ssr'
+import {clamp} from '@emotionagency/utils'
 
-import {TRAF, IState} from '../types'
-import {CreateScrollbar, TCreateScrollbar} from './CreateScrollbar'
-import {Inactivity, TInactivity} from './Inactivity'
-import {ScrollbarDrag, TScrollbarDrag} from './ScrollbarDrag'
+import {getDocument} from 'ssr-window'
+import type {IScrollController, TRAF} from '../types'
+import {CreateScrollbar} from './CreateScrollbar'
+import {Inactivity} from './Inactivity'
+import {ScrollbarDrag} from './ScrollbarDrag'
 
-const window = getWindow()
 const document = getDocument()
 
-type TEl = HTMLElement | Element | null
-
 export default class Scrollbar {
-  $scrollbar: HTMLElement
-  $thumb: HTMLElement
-  height: number
-  max: number
-  createScrollbar: TCreateScrollbar
-  inactivity: TInactivity
-  onDrag: TScrollbarDrag
-  disconnect: () => void
+  private $scrollbar!: HTMLElement
+  private $thumb!: HTMLElement
+  private thumbSize = 0
+  private cachedPadding = {top: 0, bottom: 0, left: 0, right: 0}
+
+  private readonly createScrollbar = new CreateScrollbar()
+  private readonly inactivity: Inactivity
+  private drag: ScrollbarDrag | null = null
 
   constructor(
-    readonly $el?: TEl,
-    readonly state?: IState,
-    readonly raf?: TRAF
+    private readonly controller: IScrollController,
+    private readonly raf: TRAF
   ) {
-    this.$el = $el || document.querySelector('#scroll-container')
-    this.bounds()
-
-    this.createScrollbar = new CreateScrollbar()
     this.inactivity = new Inactivity(this.setVisibility)
-
     this.init()
   }
 
-  bounds(): void {
-    const methods = ['setHeight', 'move', 'setVisibility']
-    methods.forEach(fn => (this[fn] = this[fn].bind(this)))
+  private get isHorizontal(): boolean {
+    return this.controller.isHorizontal
   }
 
-  init(): void {
-    this.$scrollbar = this.createScrollbar.create()
-    this.$thumb = this.$scrollbar.querySelector('.scrollbar__thumb')
-    this.createScrollbar.append(this.$el)
-
-    this.$scrollbar.addEventListener('mouseenter', this.inactivity.reset)
-
-    this.raf.on(this.move)
-    this.drag()
+  private cacheScrollbarPadding(): void {
+    const style = getComputedStyle(this.$scrollbar)
+    this.cachedPadding = {
+      top: parseFloat(style.paddingTop) || 0,
+      bottom: parseFloat(style.paddingBottom) || 0,
+      left: parseFloat(style.paddingLeft) || 0,
+      right: parseFloat(style.paddingRight) || 0,
+    }
   }
 
-  setHeight(): void {
-    this.height = this.$el.scrollHeight
-
-    const wh = window.innerHeight
-    let thumbH = wh * (wh / this.height)
-
-    this.max = this.height - wh
-
-    if (this.height === wh) thumbH = 0
-
-    this.$thumb.style.height = thumbH + 'px'
+  /** Inner track size excluding padding. */
+  private get trackSize(): number {
+    if (this.isHorizontal) {
+      return this.$scrollbar.clientWidth - this.cachedPadding.left - this.cachedPadding.right
+    }
+    return this.$scrollbar.clientHeight - this.cachedPadding.top - this.cachedPadding.bottom
   }
 
-  setVisibility(isActive: boolean): void {
-    if (!isActive) {
-      this.$thumb.classList.remove('scrolling')
+  private init(): void {
+    this.$scrollbar = this.createScrollbar.create(this.isHorizontal)
+    this.$thumb = this.$scrollbar.querySelector('.scrollbar__thumb')!
+
+    this.createScrollbar.append(document.body)
+    this.cacheScrollbarPadding()
+
+    this.$scrollbar.addEventListener('mouseenter', this.onMouseEnter)
+
+    this.drag = new ScrollbarDrag(
+      {$scrollbar: this.$scrollbar, $thumb: this.$thumb},
+      this.controller
+    )
+
+    this.raf.on(this.onFrame)
+  }
+
+  private readonly onMouseEnter = (): void => {
+    this.inactivity.show()
+  }
+
+  private readonly setVisibility = (isActive: boolean): void => {
+    this.$thumb.classList.toggle('scrolling', isActive)
+  }
+
+  private readonly onFrame = (): void => {
+    this.$scrollbar.classList.toggle('hidden', this.controller.isStopped)
+
+    this.updateThumbSize()
+    this.updateThumbPosition()
+
+    if (this.controller.isScrolling) {
+      this.inactivity.show()
+    }
+  }
+
+  private updateThumbSize(): void {
+    const limit = this.controller.limit
+    if (limit <= 0) {
+      this.thumbSize = 0
+      this.$thumb.style[this.isHorizontal ? 'width' : 'height'] = '0px'
       return
     }
-    this.$thumb.classList.add('scrolling')
+
+    // Thumb size is proportional: trackSize * (viewable / total)
+    // viewable / total = trackSize / (trackSize + limit) simplified
+    const track = this.trackSize
+    const ratio = track / (track + limit)
+    this.thumbSize = Math.max(track * ratio, 20) // min 20px so it stays grabbable
+
+    this.$thumb.style[this.isHorizontal ? 'width' : 'height'] =
+      this.thumbSize + 'px'
   }
 
-  move(): void {
-    this.state.disabled
-      ? this.$scrollbar.classList.add('hidden')
-      : this.$scrollbar.classList.remove('hidden')
+  private updateThumbPosition(): void {
+    const availableTravel = this.trackSize - this.thumbSize
+    if (availableTravel <= 0) return
 
-    if (this.state.isScrolling) {
-      const ch = document.documentElement.clientHeight
+    const progress = clamp(this.controller.progress, 0, 1)
+    const offset = progress * availableTravel
+    const px = offset.toFixed(2)
 
-      this.$thumb.classList.add('scrolling')
-      const scrollPos = this.state.position
-      const percent = (100 * scrollPos) / (this.height - ch)
-
-      this.$thumb.style.top = percent.toFixed(2) + '%'
-      this.$thumb.style.transform = `translateY(-${percent.toFixed(2)}%)`
+    if (this.isHorizontal) {
+      this.$thumb.style.transform = `translateX(${px}px)`
+    } else {
+      this.$thumb.style.transform = `translateY(${px}px)`
     }
-
-    this.setHeight()
   }
 
   reset(): void {
-    this.setHeight()
-    this.$thumb.style.top = '0%'
-    this.$thumb.style.transform = 'translateY(0%)'
-  }
-
-  drag(): void {
-    this.onDrag = new ScrollbarDrag(
-      {
-        $el: this.$el,
-        $thumb: this.$thumb,
-        $scrollbar: this.$scrollbar,
-      },
-      this.state
-    )
+    this.updateThumbSize()
+    this.$thumb.style.transform = this.isHorizontal
+      ? 'translateX(0px)'
+      : 'translateY(0px)'
   }
 
   destroy(): void {
-    this.onDrag && this.onDrag.destroy()
-    this.$scrollbar &&
-      this.$scrollbar.removeEventListener('mouseenter', this.inactivity.reset)
-    this.createScrollbar && this.createScrollbar.destroy()
-    this.inactivity && this.inactivity.destroy()
+    this.drag?.destroy()
+    this.drag = null
+    this.$scrollbar.removeEventListener('mouseenter', this.onMouseEnter)
+    this.createScrollbar.destroy()
+    this.inactivity.destroy()
+    this.raf.off(this.onFrame)
   }
 }
