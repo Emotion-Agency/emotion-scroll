@@ -60,6 +60,7 @@ scroll.destroy()
 | `infinite`             | `boolean`                              | `false`                    | Enable infinite (looping) scroll                                 |
 | `passive`              | `boolean`                              | `false`                    | Use passive event listeners                                      |
 | `maxTouchInertia`      | `number`                               | `1000`                     | Max inertia delta after touch release                            |
+| `anchors`              | `boolean \| ScrollToOptions`           | `false`                    | Auto-intercept anchor link clicks and smooth-scroll to target    |
 
 ## Methods
 
@@ -241,6 +242,24 @@ function animate() {
 
 animate()
 ```
+
+## Anchor links
+
+Enable `anchors` to auto-intercept `<a href="#section">` clicks and smooth-scroll to the target:
+
+```js
+const scroll = new EmotionScroll({anchors: true})
+```
+
+Pass `ScrollToOptions` to customize the animation:
+
+```js
+const scroll = new EmotionScroll({
+  anchors: {offset: -80}, // e.g. offset for a fixed header
+})
+```
+
+Only same-page hash links are intercepted. External links and links to non-existent targets are ignored. The URL hash is updated via `history.pushState`.
 
 ## License
 

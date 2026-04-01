@@ -1,4 +1,3 @@
-import VirtualScroll from 'virtual-scroll'
 import Emitter from 'tiny-emitter/dist/tinyemitter'
 import {raf, clamp, modulo} from '@emotionagency/utils'
 
@@ -6,7 +5,10 @@ import {getWindow, getDocument} from 'ssr-window'
 import {Animate} from './Animate'
 import {Dimensions} from './Dimensions'
 import {resolveOpts, type ResolvedOpts} from './opts'
-import {keyCodes} from './keyCodes'
+import {resolveScrollTarget} from './ScrollTarget'
+import {VirtualScrollHandler} from './handlers/VirtualScrollHandler'
+import {KeyboardHandler} from './handlers/KeyboardHandler'
+import {AnchorHandler} from './handlers/AnchorHandler'
 import Scrollbar from './Scrollbar'
 import type {
   IOpts,
@@ -19,24 +21,6 @@ import type {
 } from './types'
 
 const window = getWindow()
-const document = getDocument()
-
-function shouldPreventScroll(
-  node: HTMLElement | null,
-  rootEl: HTMLElement,
-  opts: ResolvedOpts,
-): boolean {
-  while (node && node !== rootEl) {
-    if (node.hasAttribute?.('data-scroll-ignore')) {
-      return true
-    }
-    if (typeof opts.prevent === 'function' && opts.prevent(node)) {
-      return true
-    }
-    node = node.parentElement
-  }
-  return false
-}
 
 export default class EmotionScroll implements IScrollController {
   // --- Public state ---
@@ -55,17 +39,21 @@ export default class EmotionScroll implements IScrollController {
   private _preventTimers: ReturnType<typeof setTimeout>[] = []
   private _resetVelocityTimeout: ReturnType<typeof setTimeout> | null = null
   private _reducedMotion = false
+  private _motionQuery: MediaQueryList | null = null
   private _time = 0
   private _isMobile = false
 
   // --- Dependencies ---
-  private readonly opts: ResolvedOpts
+  readonly opts: ResolvedOpts
   private readonly animate = new Animate()
   private readonly emitter = new Emitter()
   private readonly dimensions: Dimensions
   private readonly _raf: TRAF
 
-  private vs: typeof VirtualScroll.prototype | null = null
+  // --- Handlers ---
+  private vsHandler: VirtualScrollHandler | null = null
+  private keyboardHandler: KeyboardHandler | null = null
+  private anchorHandler: AnchorHandler | null = null
   private scrollbar: typeof Scrollbar.prototype | null = null
 
   constructor(opts: IOpts = {}) {
@@ -84,14 +72,20 @@ export default class EmotionScroll implements IScrollController {
     this.initMobileCheck()
 
     if (!this._isMobile) {
-      this.setupVirtualScroll()
+      this.initVirtualScroll()
       if (this.opts.scrollbar) {
         this.scrollbar = new Scrollbar(this, this._raf)
       }
     }
 
+    if (this.opts.anchors) {
+      this.anchorHandler = new AnchorHandler(this, this.wrapperElement)
+      this.anchorHandler.init()
+    }
+
     if (this.opts.useKeyboardSmooth) {
-      window.addEventListener('keydown', this.onKeyDown, false)
+      this.keyboardHandler = new KeyboardHandler(this)
+      this.keyboardHandler.init()
     }
 
     if (this.opts.saveScrollPosition) {
@@ -135,24 +129,24 @@ export default class EmotionScroll implements IScrollController {
   ): void {
     if ((this._isStopped || this._isLocked) && !force) return
 
-    // --- Resolve target to a pixel value ---
-    let target = this.resolveScrollTarget(_target, offset)
+    let target = resolveScrollTarget(
+      _target,
+      offset,
+      this.limit,
+      this.isHorizontal,
+      this.animatedScroll,
+    )
     if (target === null) return
 
-    // Clamp or wrap
     target = this.opts.infinite ? target : clamp(target, 0, this.limit)
 
-    // Already there
     if (target === this.targetScroll) {
       onStart?.(this)
       onComplete?.(this)
       return
     }
 
-    // Reduced motion → force immediate
-    if (this._reducedMotion) {
-      immediate = true
-    }
+    if (this._reducedMotion) immediate = true
 
     if (immediate) {
       this.animatedScroll = this.targetScroll = target
@@ -164,7 +158,6 @@ export default class EmotionScroll implements IScrollController {
       return
     }
 
-    // Use provided values or fall back to instance defaults
     const animLerp = lerp ?? this.opts.lerp
     const animDuration = duration ?? this.opts.duration
     const animEasing = easing ?? this.opts.easing
@@ -186,7 +179,6 @@ export default class EmotionScroll implements IScrollController {
         this.velocity = value - this.animatedScroll
         this.direction = Math.sign(this.velocity) as EmotionScroll['direction']
         this.animatedScroll = value
-
         this.setScroll(this.scroll)
 
         if (!completed) {
@@ -196,10 +188,7 @@ export default class EmotionScroll implements IScrollController {
           this.emit()
           onComplete?.(this)
           this.preventNextNativeScrollEvent()
-
-          if (this.opts.saveScrollPosition) {
-            this.persistScrollPosition()
-          }
+          if (this.opts.saveScrollPosition) this.persistScrollPosition()
         }
       },
     })
@@ -232,40 +221,36 @@ export default class EmotionScroll implements IScrollController {
     this.scrollbar?.reset()
   }
 
-  /** Call this manually each frame when `autoRaf` is `false`. */
   readonly update = (): void => {
     const now = performance.now()
-    const deltaTime = (now - (this._time || now)) * 0.001 // seconds
+    const deltaTime = (now - (this._time || now)) * 0.001
     this._time = now
-
     this.animate.advance(deltaTime)
   }
 
   destroy(): void {
     this._raf.off(this.update)
-    this.vs?.destroy()
-    this.vs = null
-    this.dimensions.destroy()
+    this.vsHandler?.destroy()
+    this.vsHandler = null
+    this.keyboardHandler?.destroy()
+    this.keyboardHandler = null
+    this.anchorHandler?.destroy()
+    this.anchorHandler = null
     this.scrollbar?.destroy()
     this.scrollbar = null
+    this.dimensions.destroy()
 
-    window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onMobileResize)
     this.wrapperElement.removeEventListener('scroll', this.onNativeScroll)
-
     this._motionQuery?.removeEventListener('change', this.onReducedMotionChange)
 
     if (this._resetVelocityTimeout !== null) {
       clearTimeout(this._resetVelocityTimeout)
     }
-
-    for (const timer of this._preventTimers) {
-      clearTimeout(timer)
-    }
+    for (const timer of this._preventTimers) clearTimeout(timer)
     this._preventTimers = []
 
     this.opts.el.classList.remove('es-smooth', 'es-scrolling', 'e-fixed')
-
     this.emitter.off('scroll')
     this.emitter.off('virtual-scroll')
   }
@@ -278,7 +263,7 @@ export default class EmotionScroll implements IScrollController {
     return this._isScrolling
   }
 
-  private set isScrolling(value: Scrolling) {
+  set isScrolling(value: Scrolling) {
     if (this._isScrolling === value) return
     this._isScrolling = value
     this.opts.el.classList.toggle('es-scrolling', !!value)
@@ -316,14 +301,31 @@ export default class EmotionScroll implements IScrollController {
   }
 
   // ---------------------------------------------------------------------------
+  // VirtualScrollHost interface (used by VirtualScrollHandler)
+  // ---------------------------------------------------------------------------
+
+  emitVirtualScroll(data: {
+    deltaX: number
+    deltaY: number
+    event: Event
+  }): void {
+    this.emitter.emit('virtual-scroll', data)
+  }
+
+  stopAnimation(): void {
+    this.animate.stop()
+  }
+
+  // ---------------------------------------------------------------------------
   // Native scroll integration
   // ---------------------------------------------------------------------------
 
   private get isWindowScroll(): boolean {
+    const document = getDocument()
     return this.opts.el === document.documentElement
   }
 
-  private get wrapperElement(): HTMLElement | Window {
+  get wrapperElement(): HTMLElement | Window {
     return this.isWindowScroll ? window : this.opts.el
   }
 
@@ -358,10 +360,7 @@ export default class EmotionScroll implements IScrollController {
       return
     }
 
-    // Only track native scroll when not in smooth animation
     if (this._isScrolling !== false && this._isScrolling !== 'native') return
-
-    // In infinite mode, native scroll events are just wrapping side-effects — ignore them
     if (this.opts.infinite) return
 
     const lastScroll = this.animatedScroll
@@ -370,10 +369,7 @@ export default class EmotionScroll implements IScrollController {
     this.velocity = this.animatedScroll - lastScroll
     this.direction = Math.sign(this.velocity) as EmotionScroll['direction']
 
-    if (!this._isStopped) {
-      this.isScrolling = 'native'
-    }
-
+    if (!this._isStopped) this.isScrolling = 'native'
     this.emit()
 
     if (this.velocity !== 0) {
@@ -389,193 +385,10 @@ export default class EmotionScroll implements IScrollController {
   private preventNextNativeScrollEvent(): void {
     this._preventNativeScrollCounter++
     const timer = setTimeout(() => {
-      if (this._preventNativeScrollCounter > 0) {
-        this._preventNativeScrollCounter--
-      }
+      if (this._preventNativeScrollCounter > 0) this._preventNativeScrollCounter--
       this._preventTimers = this._preventTimers.filter(t => t !== timer)
     }, 100)
     this._preventTimers.push(timer)
-  }
-
-  // ---------------------------------------------------------------------------
-  // Virtual scroll (wheel / touch input)
-  // ---------------------------------------------------------------------------
-
-  private setupVirtualScroll(): void {
-    this.vs = new VirtualScroll({
-      el: this.opts.el === document.documentElement ? undefined : this.opts.el,
-      touchMultiplier: this.opts.touchMultiplier,
-      passive: this.opts.passive,
-      useKeyboard: false,
-    })
-
-    this.vs.on(this.onVirtualScroll)
-  }
-
-  private readonly onVirtualScroll = (e: {
-    deltaX: number
-    deltaY: number
-    originalEvent: WheelEvent | TouchEvent
-  }): void => {
-    const event = e.originalEvent
-    const isTouch = event.type.includes('touch')
-    const isWheel = event.type.includes('wheel')
-
-    // Ctrl+wheel = zoom, not scroll
-    if ('ctrlKey' in event && event.ctrlKey) return
-
-    this.isTouching = event.type === 'touchstart' || event.type === 'touchmove'
-
-    // Check if target should be ignored
-    if (
-      shouldPreventScroll(event.target as HTMLElement, this.opts.el, this.opts)
-    ) {
-      return
-    }
-
-    if (this._isStopped || this._isLocked) return
-
-    const isSmooth =
-      (this.opts.syncTouch && isTouch) || (this.opts.smoothWheel && isWheel)
-
-    if (!isSmooth) {
-      this.isScrolling = 'native'
-      this.animate.stop()
-      return
-    }
-
-    // Emit virtual-scroll event
-    this.emitter.emit('virtual-scroll', {
-      deltaX: e.deltaX,
-      deltaY: e.deltaY,
-      event,
-    })
-
-    // Resolve delta based on gesture orientation
-    let delta: number
-    if (this.opts.gestureOrientation === 'both') {
-      delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX
-    } else if (this.opts.gestureOrientation === 'horizontal') {
-      delta = e.deltaX
-    } else {
-      delta = e.deltaY
-    }
-
-    // Ignore zero deltas (taps, unknown gestures)
-    if (delta === 0) return
-
-    // Negate: virtual-scroll gives positive delta for scroll-up
-    delta = -delta
-
-    // Apply wheel multiplier
-    if (isWheel) {
-      delta *= this.opts.wheelMultiplier
-    }
-
-    // Clamp to prevent jarring jumps from high-precision devices
-    delta = clamp(delta, -this.opts.maxScrollDelta, this.opts.maxScrollDelta)
-
-    // Handle touch inertia on touchend
-    const isTouchEnd = isTouch && event.type === 'touchend'
-    if (isTouchEnd && this.opts.syncTouch) {
-      const inertia =
-        Math.sign(this.velocity) *
-        Math.abs(this.velocity) ** this.opts.touchInertiaExponent
-
-      delta = clamp(
-        inertia,
-        -this.opts.maxTouchInertia,
-        this.opts.maxTouchInertia,
-      )
-    }
-
-    // Prevent native scroll when we're handling it
-    if (
-      !this.opts.overscroll ||
-      this.opts.infinite ||
-      this.isWithinBounds(delta)
-    ) {
-      if ('cancelable' in event && event.cancelable) {
-        event.preventDefault()
-      }
-    }
-
-    const isSyncTouch = isTouch && this.opts.syncTouch
-    const hasTouchInertia = isSyncTouch && isTouchEnd
-
-    this.scrollTo(this.targetScroll + delta, {
-      ...(isSyncTouch
-        ? {lerp: hasTouchInertia ? this.opts.syncTouchLerp : 1}
-        : {
-            lerp: this.opts.lerp,
-            duration: this.opts.duration,
-            easing: this.opts.easing,
-          }),
-    })
-  }
-
-  private isWithinBounds(delta: number): boolean {
-    if (this.limit <= 0) return false
-    return (
-      (this.animatedScroll > 0 && this.animatedScroll < this.limit) ||
-      (this.animatedScroll === 0 && delta > 0) ||
-      (this.animatedScroll === this.limit && delta < 0)
-    )
-  }
-
-  // ---------------------------------------------------------------------------
-  // Keyboard
-  // ---------------------------------------------------------------------------
-
-  private readonly onKeyDown = (e: KeyboardEvent): void => {
-    if (this._isStopped || this.limit <= 0) return
-
-    const step = this.opts.keyboardScrollStep
-    let target: number | null = null
-
-    switch (e.key) {
-      case keyCodes.TAB: {
-        const focused = document.activeElement as HTMLElement
-        if (focused) {
-          const rect = focused.getBoundingClientRect()
-          const offset = this.isHorizontal ? rect.left : rect.top
-          target = this.animatedScroll + offset
-        }
-        break
-      }
-      case keyCodes.UP:
-        target = this.targetScroll - step
-        break
-      case keyCodes.DOWN:
-        target = this.targetScroll + step
-        break
-      case keyCodes.LEFT:
-        if (this.isHorizontal) target = this.targetScroll - step
-        break
-      case keyCodes.RIGHT:
-        if (this.isHorizontal) target = this.targetScroll + step
-        break
-      case keyCodes.PAGEUP:
-        target =
-          this.targetScroll -
-          (this.isHorizontal ? window.innerWidth : window.innerHeight)
-        break
-      case keyCodes.PAGEDOWN:
-        target =
-          this.targetScroll +
-          (this.isHorizontal ? window.innerWidth : window.innerHeight)
-        break
-      case keyCodes.HOME:
-        target = 0
-        break
-      case keyCodes.END:
-        target = this.limit
-        break
-    }
-
-    if (target !== null) {
-      this.scrollTo(clamp(target, 0, this.limit))
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -589,6 +402,11 @@ export default class EmotionScroll implements IScrollController {
     }
   }
 
+  private initVirtualScroll(): void {
+    this.vsHandler = new VirtualScrollHandler(this)
+    this.vsHandler.setup()
+  }
+
   private readonly onMobileResize = (): void => {
     if (!this.opts.breakpoint) return
 
@@ -598,12 +416,12 @@ export default class EmotionScroll implements IScrollController {
     if (wasMobile === this._isMobile) return
 
     if (this._isMobile) {
-      this.vs?.destroy()
-      this.vs = null
+      this.vsHandler?.destroy()
+      this.vsHandler = null
       this.scrollbar?.destroy()
       this.scrollbar = null
     } else {
-      if (!this.vs) this.setupVirtualScroll()
+      if (!this.vsHandler) this.initVirtualScroll()
       if (!this.scrollbar && this.opts.scrollbar) {
         this.scrollbar = new Scrollbar(this, this._raf)
       }
@@ -614,11 +432,8 @@ export default class EmotionScroll implements IScrollController {
   // Reduced motion
   // ---------------------------------------------------------------------------
 
-  private _motionQuery: MediaQueryList | null = null
-
   private initReducedMotion(): void {
     if (typeof window.matchMedia !== 'function') return
-
     this._motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     this._reducedMotion = this._motionQuery.matches
     this._motionQuery.addEventListener('change', this.onReducedMotionChange)
@@ -638,61 +453,12 @@ export default class EmotionScroll implements IScrollController {
     const saved = window.localStorage.getItem(this.STORAGE_KEY)
     if (saved !== null) {
       const pos = Number(saved)
-      if (!Number.isNaN(pos)) {
-        this.scrollTo(pos, {immediate: true})
-      }
+      if (!Number.isNaN(pos)) this.scrollTo(pos, {immediate: true})
     }
   }
 
   private persistScrollPosition(): void {
     window.localStorage.setItem(this.STORAGE_KEY, String(this.animatedScroll))
-  }
-
-  // ---------------------------------------------------------------------------
-  // Scroll target resolution
-  // ---------------------------------------------------------------------------
-
-  private resolveScrollTarget(
-    target: ScrollTarget,
-    offset: number,
-  ): number | null {
-    // Keywords
-    if (typeof target === 'string') {
-      if (['top', 'left', 'start'].includes(target)) return 0 + offset
-      if (['bottom', 'right', 'end'].includes(target))
-        return this.limit + offset
-
-      // CSS selector
-      const node = document.querySelector(target) as HTMLElement | null
-      if (!node) return null
-      return this.getElementScrollOffset(node) + offset
-    }
-
-    // HTMLElement
-    if (target instanceof HTMLElement) {
-      return this.getElementScrollOffset(target) + offset
-    }
-
-    // Number
-    if (typeof target === 'number') {
-      return target + offset
-    }
-
-    return null
-  }
-
-  private getElementScrollOffset(node: HTMLElement): number {
-    const rect = node.getBoundingClientRect()
-    const prop = this.isHorizontal ? 'left' : 'top'
-
-    // Account for scroll-margin CSS property
-    const style = getComputedStyle(node)
-    const scrollMargin =
-      parseFloat(
-        this.isHorizontal ? style.scrollMarginLeft : style.scrollMarginTop,
-      ) || 0
-
-    return rect[prop] + this.animatedScroll - scrollMargin
   }
 
   // ---------------------------------------------------------------------------
@@ -704,8 +470,6 @@ export default class EmotionScroll implements IScrollController {
     this.isScrolling = false
 
     if (this.opts.infinite) {
-      // In infinite mode, snap accumulated scroll to the wrapped value
-      // so it doesn't grow unbounded while keeping position consistent
       const wrapped = this.scroll
       this.animatedScroll = this.targetScroll = wrapped
     } else {

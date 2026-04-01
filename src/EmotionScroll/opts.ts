@@ -14,7 +14,7 @@ const DEFAULT_EASING = (t: number): number => {
   return 1 - inv * inv * inv * (1 - t * 0.6)
 }
 
-export type ResolvedOpts = Required<Omit<IOpts, 'prevent'>> & Pick<IOpts, 'prevent'>
+export type ResolvedOpts = Required<Omit<IOpts, 'prevent' | 'anchors'>> & Pick<IOpts, 'prevent' | 'anchors'>
 
 export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
   const orientation = opts.orientation ?? 'vertical'
@@ -61,5 +61,6 @@ export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
     infinite: opts.infinite ?? false,
     passive: opts.passive ?? false,
     maxTouchInertia: opts.maxTouchInertia ?? 1000,
+    anchors: opts.anchors,
   }
 }

@@ -1,3 +1,4 @@
+import { type ResolvedOpts } from './opts';
 import type { IOpts, IScrollController, ScrollToOptions, ScrollTarget, Scrolling } from './types';
 export default class EmotionScroll implements IScrollController {
     animatedScroll: number;
@@ -13,14 +14,17 @@ export default class EmotionScroll implements IScrollController {
     private _preventTimers;
     private _resetVelocityTimeout;
     private _reducedMotion;
+    private _motionQuery;
     private _time;
     private _isMobile;
-    private readonly opts;
+    readonly opts: ResolvedOpts;
     private readonly animate;
     private readonly emitter;
     private readonly dimensions;
     private readonly _raf;
-    private vs;
+    private vsHandler;
+    private keyboardHandler;
+    private anchorHandler;
     private scrollbar;
     constructor(opts?: IOpts);
     on(event: string, cb: (...args: unknown[]) => void): void;
@@ -30,11 +34,10 @@ export default class EmotionScroll implements IScrollController {
     stop(): void;
     resize(): void;
     reset(): void;
-    /** Call this manually each frame when `autoRaf` is `false`. */
     readonly update: () => void;
     destroy(): void;
     get isScrolling(): Scrolling;
-    private set isScrolling(value);
+    set isScrolling(value: Scrolling);
     get isStopped(): boolean;
     get isLocked(): boolean;
     get isHorizontal(): boolean;
@@ -42,27 +45,27 @@ export default class EmotionScroll implements IScrollController {
     get scroll(): number;
     get progress(): number;
     get isMobile(): boolean;
+    emitVirtualScroll(data: {
+        deltaX: number;
+        deltaY: number;
+        event: Event;
+    }): void;
+    stopAnimation(): void;
     private get isWindowScroll();
-    private get wrapperElement();
+    get wrapperElement(): HTMLElement | Window;
     private get actualScroll();
     private setScroll;
     private initNativeListeners;
     private readonly onNativeScroll;
     private preventNextNativeScrollEvent;
-    private setupVirtualScroll;
-    private readonly onVirtualScroll;
-    private isWithinBounds;
-    private readonly onKeyDown;
     private initMobileCheck;
+    private initVirtualScroll;
     private readonly onMobileResize;
-    private _motionQuery;
     private initReducedMotion;
     private readonly onReducedMotionChange;
     private readonly STORAGE_KEY;
     private restoreScrollPosition;
     private persistScrollPosition;
-    private resolveScrollTarget;
-    private getElementScrollOffset;
     private resetState;
     private emit;
 }

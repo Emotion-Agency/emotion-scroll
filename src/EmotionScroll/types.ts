@@ -92,6 +92,8 @@ export interface IOpts {
   passive?: boolean
   /** Max inertia delta after touch release (prevents extreme jumps). */
   maxTouchInertia?: number
+  /** Auto-intercept anchor link clicks and smooth-scroll to target. Pass `ScrollToOptions` to customize. */
+  anchors?: boolean | ScrollToOptions
 }
 
 /** Options for `scrollTo()`. */
