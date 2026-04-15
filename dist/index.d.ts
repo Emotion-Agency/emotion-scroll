@@ -1,4 +1,5 @@
 import EmotionScroll from './EmotionScroll/EmotionScroll';
-import type { IOpts, IEventArgs, IScrollController, IVirtualScrollData, ScrollToOptions, ScrollTarget, Scrolling, Orientation, GestureOrientation, EasingFunction } from './EmotionScroll/types';
-export type { IOpts, IEventArgs, IScrollController, IVirtualScrollData, ScrollToOptions, ScrollTarget, Scrolling, Orientation, GestureOrientation, EasingFunction, };
+export { easings, smoothEasing, resolveEasing } from './EmotionScroll/easings';
+import type { IOpts, IEventArgs, IScrollController, IVirtualScrollData, ScrollToOptions, ScrollTarget, Scrolling, Orientation, GestureOrientation, EasingFunction, Easing, EasingName, EasingDirection, EasingGroupName } from './EmotionScroll/types';
+export type { IOpts, IEventArgs, IScrollController, IVirtualScrollData, ScrollToOptions, ScrollTarget, Scrolling, Orientation, GestureOrientation, EasingFunction, Easing, EasingName, EasingDirection, EasingGroupName, };
 export default EmotionScroll;

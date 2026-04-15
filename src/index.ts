@@ -1,5 +1,7 @@
 import EmotionScroll from './EmotionScroll/EmotionScroll'
 
+export {easings, smoothEasing, resolveEasing} from './EmotionScroll/easings'
+
 import type {
   IOpts,
   IEventArgs,
@@ -11,6 +13,10 @@ import type {
   Orientation,
   GestureOrientation,
   EasingFunction,
+  Easing,
+  EasingName,
+  EasingDirection,
+  EasingGroupName,
 } from './EmotionScroll/types'
 
 export type {
@@ -24,6 +30,10 @@ export type {
   Orientation,
   GestureOrientation,
   EasingFunction,
+  Easing,
+  EasingName,
+  EasingDirection,
+  EasingGroupName,
 }
 
 export default EmotionScroll

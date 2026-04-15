@@ -2,6 +2,7 @@ import {clamp} from '@emotionagency/utils'
 
 import {getDocument} from 'ssr-window'
 import type {IScrollController} from '../types'
+import type {ResolvedScrollbarOpts} from '../opts'
 
 const document = getDocument()
 
@@ -19,7 +20,8 @@ const EVENTS = {
 export class ScrollbarDrag {
   constructor(
     private readonly elements: ScrollbarElements,
-    private readonly controller: IScrollController
+    private readonly controller: IScrollController,
+    private readonly opts: ResolvedScrollbarOpts
   ) {
     this.init()
   }
@@ -69,7 +71,7 @@ export class ScrollbarDrag {
   private readonly onTrackClick = (e: MouseEvent): void => {
     if (this.controller.isStopped) return
     const target = this.pointerToScroll(e.clientX, e.clientY)
-    this.controller.scrollTo(target)
+    this.controller.scrollTo(target, {immediate: !this.opts.isSmooth})
   }
 
   private readonly onStart = (e: MouseEvent | TouchEvent): void => {
@@ -93,7 +95,7 @@ export class ScrollbarDrag {
     }
 
     const target = this.pointerToScroll(clientX, clientY)
-    this.controller.scrollTo(target)
+    this.controller.scrollTo(target, {immediate: !this.opts.isSmooth})
   }
 
   private readonly onEnd = (): void => {

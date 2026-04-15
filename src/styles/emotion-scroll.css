@@ -20,6 +20,7 @@
      --es-thumb-border-radius      Thumb border radius         (default: 7px)
      --es-thumb-border-radius-hover Thumb radius on hover      (default: 10px)
      --es-thumb-opacity            Thumb visible opacity       (default: 0.7)
+     --es-thumb-min-size           Thumb min length (px)       (default: 60)
    ========================================================================== */
 
 /* --- Scroll container --- */

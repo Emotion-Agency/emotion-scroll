@@ -1,6 +1,33 @@
 export type Orientation = 'vertical' | 'horizontal'
 export type GestureOrientation = 'vertical' | 'horizontal' | 'both'
 export type EasingFunction = (time: number) => number
+
+export type EasingDirection = 'in' | 'out' | 'inOut'
+
+export type EasingGroupName =
+  | 'power1'
+  | 'power2'
+  | 'power3'
+  | 'power4'
+  | 'quad'
+  | 'cubic'
+  | 'quart'
+  | 'quint'
+  | 'expo'
+  | 'sine'
+  | 'circ'
+  | 'back'
+  | 'elastic'
+  | 'bounce'
+
+export type EasingName =
+  | 'none'
+  | 'linear'
+  | 'smooth'
+  | EasingGroupName
+  | `${EasingGroupName}.${EasingDirection}`
+
+export type Easing = EasingFunction | EasingName
 export type Scrolling = false | 'native' | 'smooth'
 
 export type TRAF = {
@@ -34,6 +61,14 @@ export interface IVirtualScrollData {
   event: WheelEvent | TouchEvent
 }
 
+/** Scrollbar configuration. */
+export interface IScrollbarOpts {
+  /** Enable the custom scrollbar. */
+  enabled?: boolean
+  /** Smoothly animate when dragging the thumb or clicking the track. When `false`, behaves like a native scrollbar (instant jump). */
+  isSmooth?: boolean
+}
+
 /** Constructor options. */
 export interface IOpts {
   /** Scroll wrapper element. Defaults to `document.documentElement`. */
@@ -56,16 +91,17 @@ export interface IOpts {
   lerp?: number
   /** Fixed animation duration in seconds (alternative to lerp). */
   duration?: number
-  /** Easing function used with `duration`. */
-  easing?: EasingFunction
+  /** Easing used with `duration`. Accepts a function or a GSAP-style name
+   *  (e.g. `'power2.out'`, `'expo.inOut'`, `'linear'`). */
+  easing?: Easing
   /** Touch input multiplier. */
   touchMultiplier?: number
   /** Wheel input multiplier. */
   wheelMultiplier?: number
   /** Max pixels per single wheel delta (prevents jarring jumps). */
   maxScrollDelta?: number
-  /** Show custom scrollbar. */
-  scrollbar?: boolean
+  /** Show custom scrollbar. Pass an object to configure (e.g. `{ isSmooth: false }`). */
+  scrollbar?: boolean | IScrollbarOpts
   /** Viewport width below which smooth scroll is disabled. `null` = always enabled. */
   breakpoint?: number | null
   /** Enable keyboard navigation (arrows, Page Up/Down, Home/End, Tab). */
@@ -106,8 +142,8 @@ export interface ScrollToOptions {
   lock?: boolean
   /** Override animation duration. */
   duration?: number
-  /** Override easing function. */
-  easing?: EasingFunction
+  /** Override easing. Accepts a function or a GSAP-style name. */
+  easing?: Easing
   /** Override lerp factor. */
   lerp?: number
   /** Callback when animation starts. */

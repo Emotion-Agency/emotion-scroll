@@ -2,6 +2,7 @@ import {clamp} from '@emotionagency/utils'
 
 import {getDocument} from 'ssr-window'
 import type {IScrollController, TRAF} from '../types'
+import type {ResolvedScrollbarOpts} from '../opts'
 import {CreateScrollbar} from './CreateScrollbar'
 import {Inactivity} from './Inactivity'
 import {ScrollbarDrag} from './ScrollbarDrag'
@@ -12,6 +13,7 @@ export default class Scrollbar {
   private $scrollbar!: HTMLElement
   private $thumb!: HTMLElement
   private thumbSize = 0
+  private thumbMinSize = 60
   private cachedPadding = {top: 0, bottom: 0, left: 0, right: 0}
 
   private readonly createScrollbar = new CreateScrollbar()
@@ -20,7 +22,8 @@ export default class Scrollbar {
 
   constructor(
     private readonly controller: IScrollController,
-    private readonly raf: TRAF
+    private readonly raf: TRAF,
+    private readonly opts: ResolvedScrollbarOpts
   ) {
     this.inactivity = new Inactivity(this.setVisibility)
     this.init()
@@ -37,6 +40,13 @@ export default class Scrollbar {
       bottom: parseFloat(style.paddingBottom) || 0,
       left: parseFloat(style.paddingLeft) || 0,
       right: parseFloat(style.paddingRight) || 0,
+    }
+
+    const minSize = parseFloat(
+      style.getPropertyValue('--es-thumb-min-size')
+    )
+    if (Number.isFinite(minSize) && minSize >= 0) {
+      this.thumbMinSize = minSize
     }
   }
 
@@ -59,7 +69,8 @@ export default class Scrollbar {
 
     this.drag = new ScrollbarDrag(
       {$scrollbar: this.$scrollbar, $thumb: this.$thumb},
-      this.controller
+      this.controller,
+      this.opts
     )
 
     this.raf.on(this.onFrame)
@@ -96,7 +107,8 @@ export default class Scrollbar {
     // viewable / total = trackSize / (trackSize + limit) simplified
     const track = this.trackSize
     const ratio = track / (track + limit)
-    this.thumbSize = Math.max(track * ratio, 20) // min 20px so it stays grabbable
+    const min = Math.min(this.thumbMinSize, track)
+    this.thumbSize = clamp(track * ratio, min, track)
 
     this.$thumb.style[this.isHorizontal ? 'width' : 'height'] =
       this.thumbSize + 'px'

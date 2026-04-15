@@ -4,6 +4,7 @@ import {raf, clamp, modulo} from '@emotionagency/utils'
 import {getWindow, getDocument} from 'ssr-window'
 import {Animate} from './Animate'
 import {Dimensions} from './Dimensions'
+import {resolveEasing} from './easings'
 import {resolveOpts, type ResolvedOpts} from './opts'
 import {resolveScrollTarget} from './ScrollTarget'
 import {VirtualScrollHandler} from './handlers/VirtualScrollHandler'
@@ -73,8 +74,8 @@ export default class EmotionScroll implements IScrollController {
 
     if (!this._isMobile) {
       this.initVirtualScroll()
-      if (this.opts.scrollbar) {
-        this.scrollbar = new Scrollbar(this, this._raf)
+      if (this.opts.scrollbar.enabled) {
+        this.scrollbar = new Scrollbar(this, this._raf, this.opts.scrollbar)
       }
     }
 
@@ -160,7 +161,7 @@ export default class EmotionScroll implements IScrollController {
 
     const animLerp = lerp ?? this.opts.lerp
     const animDuration = duration ?? this.opts.duration
-    const animEasing = easing ?? this.opts.easing
+    const animEasing = easing !== undefined ? resolveEasing(easing) : this.opts.easing
 
     this.targetScroll = target
 
@@ -422,8 +423,8 @@ export default class EmotionScroll implements IScrollController {
       this.scrollbar = null
     } else {
       if (!this.vsHandler) this.initVirtualScroll()
-      if (!this.scrollbar && this.opts.scrollbar) {
-        this.scrollbar = new Scrollbar(this, this._raf)
+      if (!this.scrollbar && this.opts.scrollbar.enabled) {
+        this.scrollbar = new Scrollbar(this, this._raf, this.opts.scrollbar)
       }
     }
   }

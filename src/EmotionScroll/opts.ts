@@ -1,20 +1,31 @@
 import {getDocument} from 'ssr-window'
 
-import type {IOpts} from './types'
+import {resolveEasing, smoothEasing} from './easings'
+import type {EasingFunction, IOpts, IScrollbarOpts} from './types'
 
 const document = getDocument()
 
-/**
- * Custom ease-out curve with a smooth initial acceleration
- * and a long, gentle deceleration tail.
- * Feels more organic than standard exponential ease-out.
- */
-const DEFAULT_EASING = (t: number): number => {
-  const inv = 1 - t
-  return 1 - inv * inv * inv * (1 - t * 0.6)
-}
+export type ResolvedScrollbarOpts = Required<IScrollbarOpts>
 
-export type ResolvedOpts = Required<Omit<IOpts, 'prevent' | 'anchors'>> & Pick<IOpts, 'prevent' | 'anchors'>
+export type ResolvedOpts =
+  Required<Omit<IOpts, 'prevent' | 'anchors' | 'scrollbar' | 'easing'>> &
+  Pick<IOpts, 'prevent' | 'anchors'> &
+  {scrollbar: ResolvedScrollbarOpts; easing: EasingFunction | undefined}
+
+function resolveScrollbarOpts(
+  input: IOpts['scrollbar']
+): ResolvedScrollbarOpts {
+  if (typeof input === 'object' && input !== null) {
+    return {
+      enabled: input.enabled ?? true,
+      isSmooth: input.isSmooth ?? true,
+    }
+  }
+  return {
+    enabled: input as boolean | undefined ?? true,
+    isSmooth: true,
+  }
+}
 
 export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
   const orientation = opts.orientation ?? 'vertical'
@@ -22,10 +33,10 @@ export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
   // When duration is set without easing, use default easing.
   // When easing is set without duration, use 1s duration.
   let duration = opts.duration ?? undefined
-  let easing = opts.easing ?? undefined
+  let easing: EasingFunction | undefined = resolveEasing(opts.easing)
 
   if (typeof duration === 'number' && typeof easing !== 'function') {
-    easing = DEFAULT_EASING
+    easing = smoothEasing
   } else if (typeof easing === 'function' && typeof duration !== 'number') {
     duration = 1.5
   }
@@ -47,7 +58,7 @@ export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
     touchMultiplier: opts.touchMultiplier ?? 1,
     wheelMultiplier: opts.wheelMultiplier ?? 1,
     maxScrollDelta: opts.maxScrollDelta ?? 120,
-    scrollbar: opts.scrollbar ?? true,
+    scrollbar: resolveScrollbarOpts(opts.scrollbar),
     breakpoint: opts.breakpoint ?? null,
     useKeyboardSmooth: opts.useKeyboardSmooth ?? true,
     keyboardScrollStep: opts.keyboardScrollStep ?? 120,
