@@ -3,29 +3,9 @@ import {clamp} from '@emotionagency/utils'
 
 import {getDocument} from 'ssr-window'
 import type {ResolvedOpts} from '../opts'
-import type {ScrollToOptions, Scrolling} from '../types'
+import type {ScrollHost} from './ScrollHost'
 
 const document = getDocument()
-
-export interface VirtualScrollHost {
-  readonly opts: ResolvedOpts
-  animatedScroll: number
-  targetScroll: number
-  velocity: number
-  readonly limit: number
-  readonly isHorizontal: boolean
-  readonly isStopped: boolean
-  readonly isLocked: boolean
-  isScrolling: Scrolling
-  isTouching: boolean
-  scrollTo(target: number, options?: ScrollToOptions): void
-  emitVirtualScroll(data: {
-    deltaX: number
-    deltaY: number
-    event: Event
-  }): void
-  stopAnimation(): void
-}
 
 function shouldPreventScroll(
   node: HTMLElement | null,
@@ -47,7 +27,7 @@ function shouldPreventScroll(
 export class VirtualScrollHandler {
   private vs: typeof VirtualScroll.prototype | null = null
 
-  constructor(private readonly host: VirtualScrollHost) {}
+  constructor(private readonly host: ScrollHost) {}
 
   setup(): void {
     const {opts} = this.host

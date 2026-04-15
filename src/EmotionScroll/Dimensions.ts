@@ -1,5 +1,6 @@
 import {getWindow} from 'ssr-window'
 
+import {DIMENSIONS_DEBOUNCE_MS} from './constants'
 import {debounce} from './debounce'
 
 const window = getWindow()
@@ -22,7 +23,7 @@ export class Dimensions {
   constructor(
     private wrapper: HTMLElement | Window,
     private content: HTMLElement,
-    {autoResize = true, debounceDelay = 250}: DimensionsOptions = {}
+    {autoResize = true, debounceDelay = DIMENSIONS_DEBOUNCE_MS}: DimensionsOptions = {}
   ) {
     if (autoResize) {
       this.debouncedResize = debounce(this.resize, debounceDelay)

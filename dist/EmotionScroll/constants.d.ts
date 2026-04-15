@@ -1,0 +1,17 @@
+export declare const NATIVE_SCROLL_VELOCITY_RESET_MS = 400;
+export declare const NATIVE_SCROLL_GUARD_MS = 100;
+export declare const SCROLLBAR_INACTIVITY_MS = 1000;
+export declare const DIMENSIONS_DEBOUNCE_MS = 250;
+export declare const LERP_COMPLETION_EPSILON = 0.5;
+export declare const LERP_RATE_PER_SECOND = 60;
+export declare const SCROLLBAR_THUMB_MIN_SIZE_PX = 60;
+export declare const SCROLL_POSITION_STORAGE_KEY = "emotion-scroll-position";
+export declare const DEFAULT_EASED_DURATION_SEC = 1.5;
+export declare const DEFAULT_LERP = 0.1;
+export declare const DEFAULT_SYNC_TOUCH_LERP = 0.075;
+export declare const DEFAULT_TOUCH_INERTIA_EXPONENT = 1.7;
+export declare const DEFAULT_WHEEL_MULTIPLIER = 1;
+export declare const DEFAULT_TOUCH_MULTIPLIER = 1;
+export declare const DEFAULT_MAX_SCROLL_DELTA = 120;
+export declare const DEFAULT_KEYBOARD_STEP_PX = 120;
+export declare const DEFAULT_MAX_TOUCH_INERTIA = 1000;

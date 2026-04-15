@@ -1,30 +1,29 @@
 import {getWindow, getDocument} from 'ssr-window'
 
-import type {ScrollToOptions} from '../types'
+import type {ScrollHost} from './ScrollHost'
 
 const window = getWindow()
 const document = getDocument()
 
-export interface AnchorHost {
-  readonly opts: {anchors?: boolean | ScrollToOptions}
-  scrollTo(target: string, options?: ScrollToOptions): void
-}
-
 export class AnchorHandler {
   constructor(
-    private readonly host: AnchorHost,
+    private readonly host: ScrollHost,
     private readonly element: HTMLElement | Window,
   ) {}
 
   init(): void {
-    this.element.addEventListener('click', this.onClick as EventListener)
+    this.element.addEventListener('click', this.onClick)
   }
 
   destroy(): void {
-    this.element.removeEventListener('click', this.onClick as EventListener)
+    this.element.removeEventListener('click', this.onClick)
   }
 
-  private readonly onClick = (e: MouseEvent): void => {
+  private readonly onClick: EventListener = (e): void => {
+    this.handleClick(e as MouseEvent)
+  }
+
+  private handleClick(e: MouseEvent): void {
     const path = e.composedPath()
 
     for (const node of path) {

@@ -1,24 +1,25 @@
 import {clamp} from '@emotionagency/utils'
 import {getWindow, getDocument} from 'ssr-window'
 
-import {keyCodes} from '../keyCodes'
-import type {ScrollToOptions} from '../types'
+import type {ScrollHost} from './ScrollHost'
 
 const window = getWindow()
 const document = getDocument()
 
-export interface KeyboardHost {
-  readonly opts: {keyboardScrollStep: number}
-  readonly targetScroll: number
-  readonly animatedScroll: number
-  readonly limit: number
-  readonly isHorizontal: boolean
-  readonly isStopped: boolean
-  scrollTo(target: number, options?: ScrollToOptions): void
-}
+const KEY = {
+  LEFT: 'ArrowLeft',
+  UP: 'ArrowUp',
+  RIGHT: 'ArrowRight',
+  DOWN: 'ArrowDown',
+  TAB: 'Tab',
+  PAGEUP: 'PageUp',
+  PAGEDOWN: 'PageDown',
+  HOME: 'Home',
+  END: 'End',
+} as const
 
 export class KeyboardHandler {
-  constructor(private readonly host: KeyboardHost) {}
+  constructor(private readonly host: ScrollHost) {}
 
   init(): void {
     window.addEventListener('keydown', this.onKeyDown, false)
@@ -36,7 +37,7 @@ export class KeyboardHandler {
     let target: number | null = null
 
     switch (e.key) {
-      case keyCodes.TAB: {
+      case KEY.TAB: {
         const focused = document.activeElement as HTMLElement
         if (focused) {
           const rect = focused.getBoundingClientRect()
@@ -45,32 +46,32 @@ export class KeyboardHandler {
         }
         break
       }
-      case keyCodes.UP:
+      case KEY.UP:
         target = host.targetScroll - step
         break
-      case keyCodes.DOWN:
+      case KEY.DOWN:
         target = host.targetScroll + step
         break
-      case keyCodes.LEFT:
+      case KEY.LEFT:
         if (host.isHorizontal) target = host.targetScroll - step
         break
-      case keyCodes.RIGHT:
+      case KEY.RIGHT:
         if (host.isHorizontal) target = host.targetScroll + step
         break
-      case keyCodes.PAGEUP:
+      case KEY.PAGEUP:
         target =
           host.targetScroll -
           (host.isHorizontal ? window.innerWidth : window.innerHeight)
         break
-      case keyCodes.PAGEDOWN:
+      case KEY.PAGEDOWN:
         target =
           host.targetScroll +
           (host.isHorizontal ? window.innerWidth : window.innerHeight)
         break
-      case keyCodes.HOME:
+      case KEY.HOME:
         target = 0
         break
-      case keyCodes.END:
+      case KEY.END:
         target = host.limit
         break
     }

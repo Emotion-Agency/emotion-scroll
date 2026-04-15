@@ -1,6 +1,10 @@
 import {clamp} from '@emotionagency/utils'
 
 import {getDocument} from 'ssr-window'
+import {
+  SCROLLBAR_INACTIVITY_MS,
+  SCROLLBAR_THUMB_MIN_SIZE_PX,
+} from '../constants'
 import type {IScrollController, TRAF} from '../types'
 import type {ResolvedScrollbarOpts} from '../opts'
 import {CreateScrollbar} from './CreateScrollbar'
@@ -13,7 +17,7 @@ export default class Scrollbar {
   private $scrollbar!: HTMLElement
   private $thumb!: HTMLElement
   private thumbSize = 0
-  private thumbMinSize = 60
+  private thumbMinSize = SCROLLBAR_THUMB_MIN_SIZE_PX
   private cachedPadding = {top: 0, bottom: 0, left: 0, right: 0}
 
   private readonly createScrollbar = new CreateScrollbar()
@@ -25,7 +29,7 @@ export default class Scrollbar {
     private readonly raf: TRAF,
     private readonly opts: ResolvedScrollbarOpts
   ) {
-    this.inactivity = new Inactivity(this.setVisibility)
+    this.inactivity = new Inactivity(this.setVisibility, SCROLLBAR_INACTIVITY_MS)
     this.init()
   }
 

@@ -20,12 +20,7 @@ export class CreateScrollbar {
     return this.scrollbar
   }
 
-  append($el: HTMLElement | Element | null): void {
-    if (!$el) {
-      document.body.appendChild(this.scrollbar)
-      return
-    }
-
+  append($el: HTMLElement): void {
     $el.appendChild(this.scrollbar)
   }
 

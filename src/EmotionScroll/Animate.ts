@@ -1,4 +1,6 @@
 import {clamp, damp} from '@emotionagency/utils'
+
+import {LERP_COMPLETION_EPSILON, LERP_RATE_PER_SECOND} from './constants'
 import type {EasingFunction} from './types'
 
 interface AnimateOptions {
@@ -33,8 +35,8 @@ export class Animate {
       const easedProgress = completed ? 1 : this.easing(linearProgress)
       this.value = this.from + (this.to - this.from) * easedProgress
     } else if (this.lerp) {
-      this.value = damp(this.value, this.to, this.lerp * 60, deltaTime)
-      if (Math.abs(this.value - this.to) < 0.5) {
+      this.value = damp(this.value, this.to, this.lerp * LERP_RATE_PER_SECOND, deltaTime)
+      if (Math.abs(this.value - this.to) < LERP_COMPLETION_EPSILON) {
         this.value = this.to
         completed = true
       }
