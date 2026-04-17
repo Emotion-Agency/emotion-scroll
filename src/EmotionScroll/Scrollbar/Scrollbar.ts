@@ -17,8 +17,6 @@ export default class Scrollbar {
   private $scrollbar!: HTMLElement
   private $thumb!: HTMLElement
   private thumbSize = 0
-  private thumbMinSize = SCROLLBAR_THUMB_MIN_SIZE_PX
-  private cachedPadding = {top: 0, bottom: 0, left: 0, right: 0}
 
   private readonly createScrollbar = new CreateScrollbar()
   private readonly inactivity: Inactivity
@@ -37,29 +35,24 @@ export default class Scrollbar {
     return this.controller.isHorizontal
   }
 
-  private cacheScrollbarPadding(): void {
+  /** Read live geometry in a single getComputedStyle call per frame. */
+  private readGeometry(): {track: number; minThumbSize: number} {
     const style = getComputedStyle(this.$scrollbar)
-    this.cachedPadding = {
-      top: parseFloat(style.paddingTop) || 0,
-      bottom: parseFloat(style.paddingBottom) || 0,
-      left: parseFloat(style.paddingLeft) || 0,
-      right: parseFloat(style.paddingRight) || 0,
-    }
+    const padStart = parseFloat(
+      this.isHorizontal ? style.paddingLeft : style.paddingTop
+    ) || 0
+    const padEnd = parseFloat(
+      this.isHorizontal ? style.paddingRight : style.paddingBottom
+    ) || 0
+    const size = this.isHorizontal
+      ? this.$scrollbar.clientWidth
+      : this.$scrollbar.clientHeight
 
-    const minSize = parseFloat(
-      style.getPropertyValue('--es-thumb-min-size')
-    )
-    if (Number.isFinite(minSize) && minSize >= 0) {
-      this.thumbMinSize = minSize
-    }
-  }
+    const rawMin = parseFloat(style.getPropertyValue('--es-thumb-min-size'))
+    const minThumbSize =
+      Number.isFinite(rawMin) && rawMin >= 0 ? rawMin : SCROLLBAR_THUMB_MIN_SIZE_PX
 
-  /** Inner track size excluding padding. */
-  private get trackSize(): number {
-    if (this.isHorizontal) {
-      return this.$scrollbar.clientWidth - this.cachedPadding.left - this.cachedPadding.right
-    }
-    return this.$scrollbar.clientHeight - this.cachedPadding.top - this.cachedPadding.bottom
+    return {track: size - padStart - padEnd, minThumbSize}
   }
 
   private init(): void {
@@ -67,7 +60,6 @@ export default class Scrollbar {
     this.$thumb = this.$scrollbar.querySelector('.scrollbar__thumb')!
 
     this.createScrollbar.append(document.body)
-    this.cacheScrollbarPadding()
 
     this.$scrollbar.addEventListener('mouseenter', this.onMouseEnter)
 
@@ -91,17 +83,18 @@ export default class Scrollbar {
   private readonly onFrame = (): void => {
     this.$scrollbar.classList.toggle('hidden', this.controller.isStopped)
 
-    this.updateThumbSize()
-    this.updateThumbPosition()
+    const {track, minThumbSize} = this.readGeometry()
+    this.updateThumbSize(track, minThumbSize)
+    this.updateThumbPosition(track)
 
     if (this.controller.isScrolling) {
       this.inactivity.show()
     }
   }
 
-  private updateThumbSize(): void {
+  private updateThumbSize(track: number, minThumbSize: number): void {
     const limit = this.controller.limit
-    if (limit <= 0) {
+    if (limit <= 0 || track <= 0) {
       this.thumbSize = 0
       this.$thumb.style[this.isHorizontal ? 'width' : 'height'] = '0px'
       return
@@ -109,17 +102,16 @@ export default class Scrollbar {
 
     // Thumb size is proportional: trackSize * (viewable / total)
     // viewable / total = trackSize / (trackSize + limit) simplified
-    const track = this.trackSize
     const ratio = track / (track + limit)
-    const min = Math.min(this.thumbMinSize, track)
+    const min = Math.min(minThumbSize, track)
     this.thumbSize = clamp(track * ratio, min, track)
 
     this.$thumb.style[this.isHorizontal ? 'width' : 'height'] =
       this.thumbSize + 'px'
   }
 
-  private updateThumbPosition(): void {
-    const availableTravel = this.trackSize - this.thumbSize
+  private updateThumbPosition(track: number): void {
+    const availableTravel = track - this.thumbSize
     if (availableTravel <= 0) return
 
     const progress = clamp(this.controller.progress, 0, 1)
@@ -134,7 +126,8 @@ export default class Scrollbar {
   }
 
   reset(): void {
-    this.updateThumbSize()
+    const {track, minThumbSize} = this.readGeometry()
+    this.updateThumbSize(track, minThumbSize)
     this.$thumb.style.transform = this.isHorizontal
       ? 'translateX(0px)'
       : 'translateY(0px)'

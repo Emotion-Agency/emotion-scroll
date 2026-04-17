@@ -23,6 +23,17 @@
      --es-thumb-min-size           Thumb min length (px)       (default: 60)
    ========================================================================== */
 
+/* --- JS-consumed variables ---
+   `--es-thumb-min-size` is read from JS (other vars are resolved inline
+   via var() fallbacks in the rules below). We declare it on :root so that
+   editing this file changes the default. Because declarations with equal
+   specificity are resolved by source order, any user :root rule loaded
+   after this stylesheet wins; anything targeting `.scrollbar` directly
+   wins unconditionally. */
+:root {
+  --es-thumb-min-size: 60;
+}
+
 /* --- Scroll container --- */
 
 .e-fixed {
