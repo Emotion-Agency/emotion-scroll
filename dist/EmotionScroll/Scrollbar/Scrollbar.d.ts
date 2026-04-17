@@ -7,16 +7,13 @@ export default class Scrollbar {
     private $scrollbar;
     private $thumb;
     private thumbSize;
-    private thumbMinSize;
-    private cachedPadding;
     private readonly createScrollbar;
     private readonly inactivity;
     private drag;
     constructor(controller: IScrollController, raf: TRAF, opts: ResolvedScrollbarOpts);
     private get isHorizontal();
-    private cacheScrollbarPadding;
-    /** Inner track size excluding padding. */
-    private get trackSize();
+    /** Read live geometry in a single getComputedStyle call per frame. */
+    private readGeometry;
     private init;
     private readonly onMouseEnter;
     private readonly setVisibility;

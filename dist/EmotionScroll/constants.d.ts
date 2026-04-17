@@ -1,9 +1,10 @@
 export declare const NATIVE_SCROLL_VELOCITY_RESET_MS = 400;
-export declare const NATIVE_SCROLL_GUARD_MS = 100;
 export declare const SCROLLBAR_INACTIVITY_MS = 1000;
 export declare const DIMENSIONS_DEBOUNCE_MS = 250;
 export declare const LERP_COMPLETION_EPSILON = 0.5;
 export declare const LERP_RATE_PER_SECOND = 60;
+export declare const MOMENTUM_DECAY_RATE_PER_SECOND = 30;
+export declare const MOMENTUM_VELOCITY_EPSILON = 1;
 export declare const SCROLLBAR_THUMB_MIN_SIZE_PX = 60;
 export declare const SCROLL_POSITION_STORAGE_KEY = "emotion-scroll-position";
 export declare const DEFAULT_EASED_DURATION_SEC = 1.5;

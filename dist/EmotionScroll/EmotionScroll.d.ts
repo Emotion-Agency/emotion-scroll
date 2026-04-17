@@ -1,4 +1,5 @@
 import { type ResolvedOpts } from './opts';
+import { type AttachScrollTriggerOptions, type ScrollTriggerStatic } from './integrations/ScrollTrigger';
 import type { IOpts, IScrollController, ScrollTarget, ScrollToOptions, Scrolling } from './types';
 type Direction = 1 | -1 | 0;
 export default class EmotionScroll implements IScrollController {
@@ -43,6 +44,12 @@ export default class EmotionScroll implements IScrollController {
     stop(): void;
     resize(): void;
     reset(): void;
+    /**
+     * Register this instance as the source of truth for GSAP ScrollTrigger.
+     * Sets up `scrollerProxy` and forwards scroll events to `ScrollTrigger.update()`.
+     * Returns a detach function that removes the scroll listener.
+     */
+    attachScrollTrigger(ScrollTrigger: ScrollTriggerStatic, options?: AttachScrollTriggerOptions): () => void;
     readonly update: () => void;
     destroy(): void;
     emitVirtualScroll(data: {
