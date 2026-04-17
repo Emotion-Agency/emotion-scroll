@@ -1,6 +1,10 @@
 import EmotionScroll from './EmotionScroll/EmotionScroll'
 
 export {easings, smoothEasing, resolveEasing} from './EmotionScroll/easings'
+export {
+  attachScrollTrigger,
+} from './EmotionScroll/integrations/ScrollTrigger'
+export {iosMomentumPreset} from './EmotionScroll/presets'
 
 import type {
   IOpts,
@@ -18,6 +22,10 @@ import type {
   EasingDirection,
   EasingGroupName,
 } from './EmotionScroll/types'
+import type {
+  AttachScrollTriggerOptions,
+  ScrollTriggerStatic,
+} from './EmotionScroll/integrations/ScrollTrigger'
 
 export type {
   IOpts,
@@ -34,6 +42,8 @@ export type {
   EasingName,
   EasingDirection,
   EasingGroupName,
+  AttachScrollTriggerOptions,
+  ScrollTriggerStatic,
 }
 
 export default EmotionScroll

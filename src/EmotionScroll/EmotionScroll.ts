@@ -10,6 +10,11 @@ import {resolveScrollTarget} from './ScrollTarget'
 import {AnchorHandler} from './handlers/AnchorHandler'
 import {KeyboardHandler} from './handlers/KeyboardHandler'
 import {VirtualScrollHandler} from './handlers/VirtualScrollHandler'
+import {
+  attachScrollTrigger,
+  type AttachScrollTriggerOptions,
+  type ScrollTriggerStatic,
+} from './integrations/ScrollTrigger'
 import {MobileBreakpoint} from './internal/MobileBreakpoint'
 import {NativeScrollBridge} from './internal/NativeScrollBridge'
 import {ReducedMotion} from './internal/ReducedMotion'
@@ -207,6 +212,18 @@ export default class EmotionScroll implements IScrollController {
   reset(): void {
     this.scrollTo(0, {immediate: true})
     this.scrollbar?.reset()
+  }
+
+  /**
+   * Register this instance as the source of truth for GSAP ScrollTrigger.
+   * Sets up `scrollerProxy` and forwards scroll events to `ScrollTrigger.update()`.
+   * Returns a detach function that removes the scroll listener.
+   */
+  attachScrollTrigger(
+    ScrollTrigger: ScrollTriggerStatic,
+    options?: AttachScrollTriggerOptions,
+  ): () => void {
+    return attachScrollTrigger(this, ScrollTrigger, options)
   }
 
   readonly update = (): void => {
