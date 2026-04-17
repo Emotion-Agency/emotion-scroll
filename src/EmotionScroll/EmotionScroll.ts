@@ -279,7 +279,6 @@ export default class EmotionScroll implements IScrollController {
     this.animatedScroll = this.targetScroll = target
     this.setScroll(this.scroll)
     this.resetState()
-    this.nativeScroll.preventNext()
     this.notifyChange()
     onComplete?.(this)
   }
@@ -318,7 +317,6 @@ export default class EmotionScroll implements IScrollController {
         this.resetState()
         this.notifyChange()
         options.onComplete?.(this)
-        this.nativeScroll.preventNext()
         if (this.opts.saveScrollPosition) {
           this.persistence.save(this.animatedScroll)
         }
@@ -335,6 +333,7 @@ export default class EmotionScroll implements IScrollController {
   }
 
   private setScroll(value: number): void {
+    this.nativeScroll.markSet(value)
     this.wrapperElement.scrollTo({
       [this.isHorizontal ? 'left' : 'top']: value,
       behavior: 'instant' as ScrollBehavior,

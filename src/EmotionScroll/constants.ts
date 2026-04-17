@@ -1,6 +1,5 @@
 // Timer & animation tuning
 export const NATIVE_SCROLL_VELOCITY_RESET_MS = 400
-export const NATIVE_SCROLL_GUARD_MS = 100
 export const SCROLLBAR_INACTIVITY_MS = 1000
 export const DIMENSIONS_DEBOUNCE_MS = 250
 export const LERP_COMPLETION_EPSILON = 0.5

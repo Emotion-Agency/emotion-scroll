@@ -1,7 +1,4 @@
-import {
-  NATIVE_SCROLL_GUARD_MS,
-  NATIVE_SCROLL_VELOCITY_RESET_MS,
-} from '../constants'
+import {NATIVE_SCROLL_VELOCITY_RESET_MS} from '../constants'
 import type {Scrolling} from '../types'
 
 export interface NativeScrollBridgeHost {
@@ -18,15 +15,20 @@ export interface NativeScrollBridgeHost {
 }
 
 /**
- * Bridges native scroll events to the controller:
- *  - debounces velocity decay after the user stops scrolling natively,
- *  - guards against the feedback loop when the controller itself drives
- *    `element.scrollTo(...)` (see `preventNext()`).
+ * Bridges native scroll events into the controller.
+ *
+ * Native `scroll` events fire both from our own programmatic writes and
+ * from user scrolling. We distinguish them by comparing the event's
+ * `scrollTop` to the last value we wrote via `markSet()`. Browsers
+ * report integer scroll positions, so a 1.5px tolerance covers rounding
+ * of the float value we wrote against the integer the browser echoed.
+ *
+ * After a genuine native-scroll burst, `settleTimer` fires once velocity
+ * has stabilised to reset the controller back to the idle state.
  */
 export class NativeScrollBridge {
-  private guardCounter = 0
-  private guardTimers: ReturnType<typeof setTimeout>[] = []
   private settleTimer: ReturnType<typeof setTimeout> | null = null
+  private lastSetValue = Number.NaN
 
   constructor(
     private readonly wrapper: HTMLElement | Window,
@@ -35,13 +37,10 @@ export class NativeScrollBridge {
     this.wrapper.addEventListener('scroll', this.onScroll, {passive: true})
   }
 
-  preventNext(): void {
-    this.guardCounter++
-    const timer = setTimeout(() => {
-      if (this.guardCounter > 0) this.guardCounter--
-      this.guardTimers = this.guardTimers.filter(t => t !== timer)
-    }, NATIVE_SCROLL_GUARD_MS)
-    this.guardTimers.push(timer)
+  /** Record the value we're about to write so our own scroll event is
+   *  distinguishable from a user-initiated scroll. */
+  markSet(value: number): void {
+    this.lastSetValue = value
   }
 
   destroy(): void {
@@ -50,9 +49,6 @@ export class NativeScrollBridge {
       clearTimeout(this.settleTimer)
       this.settleTimer = null
     }
-    for (const timer of this.guardTimers) clearTimeout(timer)
-    this.guardTimers = []
-    this.guardCounter = 0
   }
 
   private readonly onScroll = (): void => {
@@ -61,17 +57,16 @@ export class NativeScrollBridge {
       this.settleTimer = null
     }
 
-    if (this.guardCounter > 0) {
-      this.guardCounter--
-      return
-    }
-
     const {host} = this
+    const actual = host.getActualScroll()
+
+    if (Math.abs(actual - this.lastSetValue) < 1.5) return
+
     if (host.isScrolling !== false && host.isScrolling !== 'native') return
     if (host.opts.infinite) return
 
     const lastScroll = host.animatedScroll
-    host.animatedScroll = host.targetScroll = host.getActualScroll()
+    host.animatedScroll = host.targetScroll = actual
     host.lastVelocity = host.velocity
     host.velocity = host.animatedScroll - lastScroll
     host.direction = Math.sign(host.velocity) as 1 | -1 | 0
