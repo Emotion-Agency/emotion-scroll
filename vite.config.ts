@@ -29,12 +29,11 @@ export default defineConfig({
         globals: {
           // external deps you want to exclude from the bundle
           'tiny-emitter': 'TinyEmitter',
-          'virtual-scroll': 'VirtualScroll',
           '@emotionagency/utils': 'EmotionUtils',
           'ssr-window': 'SsrWindow',
         },
       },
-      external: ['tiny-emitter', 'virtual-scroll', '@emotionagency/utils', 'ssr-window'],
+      external: ['tiny-emitter', '@emotionagency/utils', 'ssr-window'],
     },
     emptyOutDir: true,
   },
