@@ -1,7 +1,7 @@
-var lt = Object.defineProperty;
-var at = (e, t, i) => t in e ? lt(e, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : e[t] = i;
-var n = (e, t, i) => at(e, typeof t != "symbol" ? t + "" : t, i);
-import { clamp as v, damp as $, raf as ct, modulo as ht } from "@emotionagency/utils";
+var ot = Object.defineProperty;
+var lt = (e, t, i) => t in e ? ot(e, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : e[t] = i;
+var n = (e, t, i) => lt(e, typeof t != "symbol" ? t + "" : t, i);
+import { clamp as v, damp as at, raf as ct, modulo as ht } from "@emotionagency/utils";
 import { getWindow as f, getDocument as d } from "ssr-window";
 function ut(e) {
   return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;
@@ -9,7 +9,7 @@ function ut(e) {
 function y(e) {
   throw new Error('Could not dynamically require "' + e + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
 }
-var Q = { exports: {} };
+var J = { exports: {} };
 (function(e, t) {
   (function(i) {
     e.exports = i();
@@ -24,11 +24,11 @@ var Q = { exports: {} };
             var b = new Error("Cannot find module '" + c + "'");
             throw b.code = "MODULE_NOT_FOUND", b;
           }
-          var I = r[c] = { exports: {} };
-          s[c][0].call(I.exports, function(A) {
-            var x = s[c][1][A];
-            return l(x || A);
-          }, I, I.exports, i, s, r, o);
+          var k = r[c] = { exports: {} };
+          s[c][0].call(k.exports, function(D) {
+            var x = s[c][1][D];
+            return l(x || D);
+          }, k, k.exports, i, s, r, o);
         }
         return r[c].exports;
       }
@@ -68,10 +68,10 @@ var Q = { exports: {} };
       }, s.exports = o, s.exports.TinyEmitter = o;
     }, {}] }, {}, [1])(1);
   });
-})(Q);
-var dt = Q.exports;
-const mt = /* @__PURE__ */ ut(dt), pt = 400, ft = 1e3, gt = 250, vt = 0.5, St = 60, bt = 30, yt = 1, Tt = 60, N = "emotion-scroll-position", Et = 1.5, wt = 0.1, Lt = 0.075, Mt = 1.7, _t = 1, Ot = 1, zt = 120, Pt = 120, Rt = 1e3;
-class Ht {
+})(J);
+var dt = J.exports;
+const pt = /* @__PURE__ */ ut(dt), mt = 400, ft = 1e3, gt = 250, vt = 0.5, St = 60, bt = 60, $ = "emotion-scroll-position", yt = 1.5, Tt = 0.1, Et = 0.075, wt = 1.7, Lt = 1, Mt = 1, _t = 120, zt = 120, Pt = 1e3;
+class Ot {
   constructor() {
     n(this, "isRunning", !1);
     n(this, "value", 0);
@@ -82,15 +82,10 @@ class Ht {
     n(this, "duration");
     n(this, "easing");
     n(this, "onUpdate");
-    // Momentum carryover state
-    n(this, "previousValue", 0);
-    n(this, "lastDeltaTime", 0);
-    n(this, "momentumVelocity", 0);
   }
   advance(t) {
     var s;
     if (!this.isRunning) return;
-    this.previousValue = this.value, this.lastDeltaTime = t;
     let i = !1;
     if (this.duration && this.easing) {
       this.currentTime += t;
@@ -98,24 +93,18 @@ class Ht {
       i = r >= 1;
       const o = i ? 1 : this.easing(r);
       this.value = this.from + (this.to - this.from) * o;
-    } else this.lerp ? this.value = $(this.value, this.to, this.lerp * St, t) : (this.value = this.to, i = !0);
-    this.momentumVelocity !== 0 && (this.momentumVelocity = $(
-      this.momentumVelocity,
-      0,
-      bt,
-      t
-    ), this.value += this.momentumVelocity * t, Math.abs(this.momentumVelocity) < yt && (this.momentumVelocity = 0)), !i && this.lerp && !this.duration && this.momentumVelocity === 0 && Math.abs(this.value - this.to) < vt && (this.value = this.to, i = !0), i && this.stop(), (s = this.onUpdate) == null || s.call(this, this.value, i);
+    } else this.lerp ? (this.value = at(this.value, this.to, this.lerp * St, t), Math.abs(this.value - this.to) < vt && (this.value = this.to, i = !0)) : (this.value = this.to, i = !0);
+    i && this.stop(), (s = this.onUpdate) == null || s.call(this, this.value, i);
   }
   fromTo(t, i, s) {
-    var a;
-    const r = this.isRunning && this.lastDeltaTime > 0 ? (this.value - this.previousValue) / this.lastDeltaTime : 0, o = typeof s.duration == "number", l = r !== 0 && Math.sign(i - t) !== Math.sign(r);
-    this.momentumVelocity = o || l ? r : 0, this.from = this.value = this.previousValue = t, this.to = i, this.lerp = s.lerp, this.duration = s.duration, this.easing = s.easing, this.currentTime = 0, this.isRunning = !0, this.onUpdate = s.onUpdate, (a = s.onStart) == null || a.call(s);
+    var r;
+    this.from = this.value = t, this.to = i, this.lerp = s.lerp, this.duration = s.duration, this.easing = s.easing, this.currentTime = 0, this.isRunning = !0, this.onUpdate = s.onUpdate, (r = s.onStart) == null || r.call(s);
   }
   stop() {
-    this.isRunning = !1, this.momentumVelocity = 0;
+    this.isRunning = !1;
   }
 }
-function It(e, t) {
+function Ht(e, t) {
   let i;
   return function(...s) {
     clearTimeout(i), i = setTimeout(() => {
@@ -124,7 +113,7 @@ function It(e, t) {
   };
 }
 const T = f();
-class kt {
+class Rt {
   constructor(t, i, { autoResize: s = !0, debounceDelay: r = gt } = {}) {
     n(this, "width", 0);
     n(this, "height", 0);
@@ -136,7 +125,7 @@ class kt {
     n(this, "resize", () => {
       this.wrapper instanceof Window ? (this.width = T.innerWidth, this.height = T.innerHeight, this.scrollWidth = this.content.scrollWidth, this.scrollHeight = this.content.scrollHeight) : (this.width = this.wrapper.clientWidth, this.height = this.wrapper.clientHeight, this.scrollWidth = this.wrapper.scrollWidth, this.scrollHeight = this.wrapper.scrollHeight);
     });
-    this.wrapper = t, this.content = i, s && (this.debouncedResize = It(this.resize, r), this.wrapper instanceof Window ? T.addEventListener("resize", this.debouncedResize) : typeof ResizeObserver < "u" && (this.wrapperResizeObserver = new ResizeObserver(this.debouncedResize), this.wrapperResizeObserver.observe(this.wrapper)), typeof ResizeObserver < "u" && (this.contentResizeObserver = new ResizeObserver(this.debouncedResize), this.contentResizeObserver.observe(this.content))), this.resize();
+    this.wrapper = t, this.content = i, s && (this.debouncedResize = Ht(this.resize, r), this.wrapper instanceof Window ? T.addEventListener("resize", this.debouncedResize) : typeof ResizeObserver < "u" && (this.wrapperResizeObserver = new ResizeObserver(this.debouncedResize), this.wrapperResizeObserver.observe(this.wrapper)), typeof ResizeObserver < "u" && (this.contentResizeObserver = new ResizeObserver(this.debouncedResize), this.contentResizeObserver.observe(this.content))), this.resize();
   }
   get limit() {
     return {
@@ -149,33 +138,33 @@ class kt {
     (t = this.wrapperResizeObserver) == null || t.disconnect(), (i = this.contentResizeObserver) == null || i.disconnect(), this.wrapper instanceof Window && this.debouncedResize && T.removeEventListener("resize", this.debouncedResize);
   }
 }
-const M = (e) => e, D = (e) => {
+const M = (e) => e, A = (e) => {
   const t = 1 - e;
   return 1 - t * t * t * (1 - e * 0.6);
-}, H = (e) => ({
+}, R = (e) => ({
   in: (t) => t ** e,
   out: (t) => 1 - (1 - t) ** e,
   inOut: (t) => t < 0.5 ? 2 ** (e - 1) * t ** e : 1 - (-2 * t + 2) ** e / 2
-}), _ = H(2), O = H(3), z = H(4), P = H(5), tt = {
+}), _ = R(2), z = R(3), P = R(4), O = R(5), Q = {
   in: (e) => e === 0 ? 0 : 2 ** (10 * e - 10),
   out: (e) => e === 1 ? 1 : 1 - 2 ** (-10 * e),
   inOut: (e) => e === 0 ? 0 : e === 1 ? 1 : e < 0.5 ? 2 ** (20 * e - 10) / 2 : (2 - 2 ** (-20 * e + 10)) / 2
-}, et = {
+}, tt = {
   in: (e) => 1 - Math.cos(e * Math.PI / 2),
   out: (e) => Math.sin(e * Math.PI / 2),
   inOut: (e) => -(Math.cos(Math.PI * e) - 1) / 2
-}, it = {
+}, et = {
   in: (e) => 1 - Math.sqrt(1 - e * e),
   out: (e) => Math.sqrt(1 - (e - 1) ** 2),
   inOut: (e) => e < 0.5 ? (1 - Math.sqrt(1 - (2 * e) ** 2)) / 2 : (Math.sqrt(1 - (-2 * e + 2) ** 2) + 1) / 2
-}, R = 1.70158, E = R * 1.525, U = R + 1, st = {
-  in: (e) => U * e * e * e - R * e * e,
-  out: (e) => 1 + U * (e - 1) ** 3 + R * (e - 1) ** 2,
+}, H = 1.70158, E = H * 1.525, U = H + 1, it = {
+  in: (e) => U * e * e * e - H * e * e,
+  out: (e) => 1 + U * (e - 1) ** 3 + H * (e - 1) ** 2,
   inOut: (e) => e < 0.5 ? (2 * e) ** 2 * ((E + 1) * 2 * e - E) / 2 : ((2 * e - 2) ** 2 * ((E + 1) * (e * 2 - 2) + E) + 2) / 2
-}, W = 2 * Math.PI / 3, V = 2 * Math.PI / 4.5, rt = {
-  in: (e) => e === 0 ? 0 : e === 1 ? 1 : -(2 ** (10 * e - 10)) * Math.sin((e * 10 - 10.75) * W),
-  out: (e) => e === 0 ? 0 : e === 1 ? 1 : 2 ** (-10 * e) * Math.sin((e * 10 - 0.75) * W) + 1,
-  inOut: (e) => e === 0 ? 0 : e === 1 ? 1 : e < 0.5 ? -(2 ** (20 * e - 10) * Math.sin((20 * e - 11.125) * V)) / 2 : 2 ** (-20 * e + 10) * Math.sin((20 * e - 11.125) * V) / 2 + 1
+}, N = 2 * Math.PI / 3, W = 2 * Math.PI / 4.5, st = {
+  in: (e) => e === 0 ? 0 : e === 1 ? 1 : -(2 ** (10 * e - 10)) * Math.sin((e * 10 - 10.75) * N),
+  out: (e) => e === 0 ? 0 : e === 1 ? 1 : 2 ** (-10 * e) * Math.sin((e * 10 - 0.75) * N) + 1,
+  inOut: (e) => e === 0 ? 0 : e === 1 ? 1 : e < 0.5 ? -(2 ** (20 * e - 10) * Math.sin((20 * e - 11.125) * W)) / 2 : 2 ** (-20 * e + 10) * Math.sin((20 * e - 11.125) * W) / 2 + 1
 }, w = (e) => {
   if (e < 1 / 2.75) return 7.5625 * e * e;
   if (e < 2 / 2.75) {
@@ -188,67 +177,67 @@ const M = (e) => e, D = (e) => {
   }
   const s = e - 2.625 / 2.75;
   return 7.5625 * s * s + 0.984375;
-}, nt = {
+}, rt = {
   in: (e) => 1 - w(1 - e),
   out: w,
   inOut: (e) => e < 0.5 ? (1 - w(1 - 2 * e)) / 2 : (1 + w(2 * e - 1)) / 2
-}, ue = {
+}, ce = {
   linear: M,
   none: M,
-  smooth: D,
+  smooth: A,
   power1: _,
-  power2: O,
-  power3: z,
-  power4: P,
+  power2: z,
+  power3: P,
+  power4: O,
   quad: _,
-  cubic: O,
-  quart: z,
-  quint: P,
-  expo: tt,
-  sine: et,
-  circ: it,
-  back: st,
-  elastic: rt,
-  bounce: nt
-}, Ct = {
+  cubic: z,
+  quart: P,
+  quint: O,
+  expo: Q,
+  sine: tt,
+  circ: et,
+  back: it,
+  elastic: st,
+  bounce: rt
+}, kt = {
   power1: _,
-  power2: O,
-  power3: z,
-  power4: P,
+  power2: z,
+  power3: P,
+  power4: O,
   quad: _,
-  cubic: O,
-  quart: z,
-  quint: P,
-  expo: tt,
-  sine: et,
-  circ: it,
-  back: st,
-  elastic: rt,
-  bounce: nt
+  cubic: z,
+  quart: P,
+  quint: O,
+  expo: Q,
+  sine: tt,
+  circ: et,
+  back: it,
+  elastic: st,
+  bounce: rt
 };
-var J;
-const Dt = typeof process > "u" || ((J = process.env) == null ? void 0 : J.NODE_ENV) !== "production", F = /* @__PURE__ */ new Set();
-function Y(e, t) {
-  !Dt || F.has(t) || (F.add(t), console.warn(`[emotion-scroll] ${e}`));
+var Z;
+const It = typeof process > "u" || ((Z = process.env) == null ? void 0 : Z.NODE_ENV) !== "production", F = /* @__PURE__ */ new Set();
+function X(e, t) {
+  !It || F.has(t) || (F.add(t), console.warn(`[emotion-scroll] ${e}`));
 }
-function ot(e) {
+function nt(e) {
   if (typeof e != "string") return e;
   if (e === "none" || e === "linear") return M;
-  if (e === "smooth") return D;
-  const [t, i = "out"] = e.split("."), s = Ct[t];
+  if (e === "smooth") return A;
+  const [t, i = "out"] = e.split("."), s = kt[t];
   if (!s)
-    return Y(
+    return X(
       `Unknown easing "${e}". Falling back to linear.`,
       e
     ), M;
   const r = s[i];
-  return r || (Y(
+  return r || (X(
     `Unknown easing direction "${i}" for "${t}". Expected "in", "out" or "inOut". Falling back to "${t}.out".`,
     e
   ), s.out);
 }
-const X = d();
-function At(e) {
+const Y = d();
+function Ct(e) {
   return typeof e == "object" && e !== null ? {
     enabled: e.enabled ?? !0,
     isSmooth: e.isSmooth ?? !0
@@ -257,28 +246,28 @@ function At(e) {
     isSmooth: !0
   };
 }
-function xt(e = {}) {
+function At(e = {}) {
   const t = e.orientation ?? "vertical";
-  let i = e.duration ?? void 0, s = ot(e.easing);
-  return typeof i == "number" && typeof s != "function" ? s = D : typeof s == "function" && typeof i != "number" && (i = Et), {
-    el: e.el ?? X.documentElement,
-    content: e.content ?? e.el ?? X.documentElement,
+  let i = e.duration ?? void 0, s = nt(e.easing);
+  return typeof i == "number" && typeof s != "function" ? s = A : typeof s == "function" && typeof i != "number" && (i = yt), {
+    el: e.el ?? Y.documentElement,
+    content: e.content ?? e.el ?? Y.documentElement,
     orientation: t,
     gestureOrientation: e.gestureOrientation ?? (t === "horizontal" ? "both" : "vertical"),
     smoothWheel: e.smoothWheel ?? !0,
     syncTouch: e.syncTouch ?? !1,
-    syncTouchLerp: e.syncTouchLerp ?? Lt,
-    touchInertiaExponent: e.touchInertiaExponent ?? Mt,
-    lerp: e.lerp ?? wt,
+    syncTouchLerp: e.syncTouchLerp ?? Et,
+    touchInertiaExponent: e.touchInertiaExponent ?? wt,
+    lerp: e.lerp ?? Tt,
     duration: i,
     easing: s,
-    touchMultiplier: e.touchMultiplier ?? Ot,
-    wheelMultiplier: e.wheelMultiplier ?? _t,
-    maxScrollDelta: e.maxScrollDelta ?? zt,
-    scrollbar: At(e.scrollbar),
+    touchMultiplier: e.touchMultiplier ?? Mt,
+    wheelMultiplier: e.wheelMultiplier ?? Lt,
+    maxScrollDelta: e.maxScrollDelta ?? _t,
+    scrollbar: Ct(e.scrollbar),
     breakpoint: e.breakpoint ?? null,
     useKeyboardSmooth: e.useKeyboardSmooth ?? !0,
-    keyboardScrollStep: e.keyboardScrollStep ?? Pt,
+    keyboardScrollStep: e.keyboardScrollStep ?? zt,
     disabled: e.disabled ?? !1,
     raf: e.raf ?? null,
     autoRaf: e.autoRaf ?? !0,
@@ -288,16 +277,16 @@ function xt(e = {}) {
     overscroll: e.overscroll ?? !0,
     infinite: e.infinite ?? !1,
     passive: e.passive ?? !1,
-    maxTouchInertia: e.maxTouchInertia ?? Rt,
+    maxTouchInertia: e.maxTouchInertia ?? Pt,
     anchors: e.anchors
   };
 }
-const $t = d();
-function Nt(e, t, i, s, r) {
+const Dt = d();
+function xt(e, t, i, s, r) {
   if (typeof e == "string") {
     if (["top", "left", "start"].includes(e)) return 0 + t;
     if (["bottom", "right", "end"].includes(e)) return i + t;
-    const o = $t.querySelector(e);
+    const o = Dt.querySelector(e);
     return o ? q(o, s, r) + t : null;
   }
   return e instanceof HTMLElement ? q(e, s, r) + t : typeof e == "number" ? e + t : null;
@@ -306,8 +295,8 @@ function q(e, t, i) {
   const s = e.getBoundingClientRect(), r = t ? "left" : "top", o = getComputedStyle(e), l = parseFloat(t ? o.scrollMarginLeft : o.scrollMarginTop) || 0;
   return s[r] + i - l;
 }
-const Ut = f(), Wt = d();
-class Vt {
+const $t = f(), Ut = d();
+class Nt {
   constructor(t, i) {
     n(this, "onClick", (t) => {
       this.handleClick(t);
@@ -324,10 +313,10 @@ class Vt {
     const i = t.composedPath();
     for (const s of i) {
       if (!(s instanceof HTMLAnchorElement) || !s.href) continue;
-      const r = new URL(s.href), o = new URL(Ut.location.href);
+      const r = new URL(s.href), o = new URL($t.location.href);
       if (r.host !== o.host || r.pathname !== o.pathname || !r.hash) continue;
       const l = r.hash;
-      if (!Wt.querySelector(l)) continue;
+      if (!Ut.querySelector(l)) continue;
       t.preventDefault();
       const a = typeof this.host.opts.anchors == "object" ? this.host.opts.anchors : void 0;
       this.host.scrollTo(l, a), history.pushState(null, "", l);
@@ -335,7 +324,7 @@ class Vt {
     }
   }
 }
-const S = f(), Ft = d(), m = {
+const S = f(), Wt = d(), p = {
   LEFT: "ArrowLeft",
   UP: "ArrowUp",
   RIGHT: "ArrowRight",
@@ -346,7 +335,7 @@ const S = f(), Ft = d(), m = {
   HOME: "Home",
   END: "End"
 };
-class Yt {
+class Ft {
   constructor(t) {
     n(this, "onKeyDown", (t) => {
       const { host: i } = this;
@@ -354,36 +343,36 @@ class Yt {
       const s = i.opts.keyboardScrollStep;
       let r = null;
       switch (t.key) {
-        case m.TAB: {
-          const o = Ft.activeElement;
+        case p.TAB: {
+          const o = Wt.activeElement;
           if (o) {
             const l = o.getBoundingClientRect(), a = i.isHorizontal ? l.left : l.top;
             r = i.animatedScroll + a;
           }
           break;
         }
-        case m.UP:
+        case p.UP:
           r = i.targetScroll - s;
           break;
-        case m.DOWN:
+        case p.DOWN:
           r = i.targetScroll + s;
           break;
-        case m.LEFT:
+        case p.LEFT:
           i.isHorizontal && (r = i.targetScroll - s);
           break;
-        case m.RIGHT:
+        case p.RIGHT:
           i.isHorizontal && (r = i.targetScroll + s);
           break;
-        case m.PAGEUP:
+        case p.PAGEUP:
           r = i.targetScroll - (i.isHorizontal ? S.innerWidth : S.innerHeight);
           break;
-        case m.PAGEDOWN:
+        case p.PAGEDOWN:
           r = i.targetScroll + (i.isHorizontal ? S.innerWidth : S.innerHeight);
           break;
-        case m.HOME:
+        case p.HOME:
           r = 0;
           break;
-        case m.END:
+        case p.END:
           r = i.limit;
           break;
       }
@@ -398,8 +387,8 @@ class Yt {
     S.removeEventListener("keydown", this.onKeyDown);
   }
 }
-const Xt = 100, B = 16, qt = 1e3 / 60;
-class Bt {
+const Xt = 100, V = 16, Yt = 1e3 / 60;
+class qt {
   constructor() {
     n(this, "samples", []);
   }
@@ -407,14 +396,14 @@ class Bt {
     this.samples.length = 0;
   }
   add(t, i, s = performance.now()) {
-    this.trim(s), this.samples.push({ x: t, y: i, t: s }), this.samples.length > B && this.samples.splice(0, this.samples.length - B);
+    this.trim(s), this.samples.push({ x: t, y: i, t: s }), this.samples.length > V && this.samples.splice(0, this.samples.length - V);
   }
   /** Returns {x, y} velocity in px/frame, matching host.velocity scale. */
   velocity(t = performance.now()) {
     if (this.trim(t), this.samples.length < 2) return { x: 0, y: 0 };
     const i = this.samples[0], s = this.samples[this.samples.length - 1], r = s.t - i.t;
     if (r <= 0) return { x: 0, y: 0 };
-    const o = qt / r;
+    const o = Yt / r;
     return {
       x: (s.x - i.x) * o,
       y: (s.y - i.y) * o
@@ -427,14 +416,14 @@ class Bt {
     s > 0 && this.samples.splice(0, s);
   }
 }
-const K = 15;
-function Kt(e) {
+const B = 15;
+function Vt(e) {
   const t = e;
   let i = t.wheelDeltaX || -e.deltaX, s = t.wheelDeltaY || -e.deltaY;
-  return e.deltaMode === 1 && (i *= K, s *= K), { deltaX: i, deltaY: s };
+  return e.deltaMode === 1 && (i *= B, s *= B), { deltaX: i, deltaY: s };
 }
-const Gt = d(), jt = f();
-function k(e, t, i) {
+const Bt = d(), Kt = f();
+function I(e, t, i) {
   var s;
   for (; e && e !== t; ) {
     if ((s = e.hasAttribute) != null && s.call(e, "data-scroll-ignore") || typeof i.prevent == "function" && i.prevent(e))
@@ -443,15 +432,15 @@ function k(e, t, i) {
   }
   return !1;
 }
-class Zt {
+class Gt {
   constructor(t) {
     n(this, "eventTarget", null);
     n(this, "listenerOpts", { passive: !1 });
-    n(this, "finger", new Bt());
+    n(this, "finger", new qt());
     n(this, "lastTouchX", 0);
     n(this, "lastTouchY", 0);
     n(this, "onWheel", (t) => {
-      const { deltaX: i, deltaY: s } = Kt(t);
+      const { deltaX: i, deltaY: s } = Vt(t);
       this.onScrollEvent({ deltaX: i, deltaY: s, originalEvent: t });
     });
     n(this, "onTouchStart", (t) => {
@@ -459,7 +448,7 @@ class Zt {
       const i = ((o = t.targetTouches) == null ? void 0 : o[0]) ?? ((l = t.changedTouches) == null ? void 0 : l[0]);
       if (!i) return;
       const { host: s } = this, { opts: r } = s;
-      this.lastTouchX = i.pageX, this.lastTouchY = i.pageY, this.finger.reset(), this.finger.add(i.pageX, i.pageY), !k(t.target, r.el, r) && (s.isTouching = !0, r.syncTouch && !s.isStopped && !s.isLocked && (s.stopAnimation(), s.targetScroll = s.animatedScroll));
+      this.lastTouchX = i.pageX, this.lastTouchY = i.pageY, this.finger.reset(), this.finger.add(i.pageX, i.pageY), !I(t.target, r.el, r) && (s.isTouching = !0, r.syncTouch && !s.isStopped && !s.isLocked && (s.stopAnimation(), s.targetScroll = s.animatedScroll));
     });
     n(this, "onTouchMove", (t) => {
       var l, a;
@@ -472,7 +461,7 @@ class Zt {
       const { host: i } = this, { opts: s } = i, { x: r, y: o } = this.finger.velocity();
       this.finger.reset();
       const l = i.isTouching;
-      if (i.isTouching = !1, !l || !s.syncTouch || k(t.target, s.el, s) || i.isStopped || i.isLocked) return;
+      if (i.isTouching = !1, !l || !s.syncTouch || I(t.target, s.el, s) || i.isStopped || i.isLocked) return;
       let a;
       if (s.gestureOrientation === "both" ? a = Math.abs(o) > Math.abs(r) ? o : r : s.gestureOrientation === "horizontal" ? a = r : a = o, a = -a * s.touchMultiplier, a === 0) return;
       const h = Math.sign(a) * Math.abs(a) ** s.touchInertiaExponent, c = v(h, -s.maxTouchInertia, s.maxTouchInertia);
@@ -481,8 +470,8 @@ class Zt {
     this.host = t;
   }
   setup() {
-    const { opts: t } = this.host, i = t.el === Gt.documentElement;
-    this.eventTarget = i ? jt : t.el, this.listenerOpts = { passive: t.passive }, this.bindInput(!0);
+    const { opts: t } = this.host, i = t.el === Bt.documentElement;
+    this.eventTarget = i ? Kt : t.el, this.listenerOpts = { passive: t.passive }, this.bindInput(!0);
   }
   destroy() {
     this.bindInput(!1), this.eventTarget = null, this.finger.reset();
@@ -495,7 +484,7 @@ class Zt {
   }
   onScrollEvent(t) {
     const { host: i } = this, { opts: s } = i, r = t.originalEvent, o = r.type.includes("touch"), l = r.type.includes("wheel");
-    if ("ctrlKey" in r && r.ctrlKey || k(r.target, s.el, s) || i.isStopped || i.isLocked) return;
+    if ("ctrlKey" in r && r.ctrlKey || I(r.target, s.el, s) || i.isStopped || i.isLocked) return;
     if (!(s.syncTouch && o || s.smoothWheel && l)) {
       i.isScrolling = "native", i.stopAnimation();
       return;
@@ -514,7 +503,7 @@ class Zt {
     return s <= 0 ? !1 : i > 0 && i < s || i === 0 && t > 0 || i === s && t < 0;
   }
 }
-function Jt(e, t, i = {}) {
+function jt(e, t, i = {}) {
   const s = d(), r = f(), o = e.opts.el, l = o === s.documentElement, { setAsDefault: a = !0 } = i, h = {
     getBoundingClientRect: () => ({
       top: 0,
@@ -545,7 +534,7 @@ function Jt(e, t, i = {}) {
   };
 }
 const L = f();
-class Qt {
+class Zt {
   constructor(t, i, s) {
     n(this, "isMobile", !1);
     n(this, "onResize", () => {
@@ -559,7 +548,7 @@ class Qt {
     L.removeEventListener("resize", this.onResize);
   }
 }
-class te {
+class Jt {
   constructor(t, i) {
     n(this, "settleTimer", null);
     n(this, "lastSetValue", Number.NaN);
@@ -570,7 +559,7 @@ class te {
       const s = t.animatedScroll;
       t.animatedScroll = t.targetScroll = i, t.lastVelocity = t.velocity, t.velocity = t.animatedScroll - s, t.direction = Math.sign(t.velocity), t.isStopped || (t.isScrolling = "native"), t.onScrollChanged(), t.velocity !== 0 && (this.settleTimer = setTimeout(() => {
         t.lastVelocity = t.velocity, t.velocity = 0, t.isScrolling = !1, t.onScrollChanged();
-      }, pt));
+      }, mt));
     });
     this.wrapper = t, this.host = i, this.wrapper.addEventListener("scroll", this.onScroll, { passive: !0 });
   }
@@ -583,41 +572,41 @@ class te {
     this.wrapper.removeEventListener("scroll", this.onScroll), this.settleTimer !== null && (clearTimeout(this.settleTimer), this.settleTimer = null);
   }
 }
-const G = f();
-class ee {
+const K = f();
+class Qt {
   constructor() {
     n(this, "matches", !1);
     n(this, "query", null);
     n(this, "onChange", (t) => {
       this.matches = t.matches;
     });
-    typeof G.matchMedia == "function" && (this.query = G.matchMedia("(prefers-reduced-motion: reduce)"), this.matches = this.query.matches, this.query.addEventListener("change", this.onChange));
+    typeof K.matchMedia == "function" && (this.query = K.matchMedia("(prefers-reduced-motion: reduce)"), this.matches = this.query.matches, this.query.addEventListener("change", this.onChange));
   }
   destroy() {
     var t;
     (t = this.query) == null || t.removeEventListener("change", this.onChange), this.query = null;
   }
 }
-const j = f();
-class ie {
+const G = f();
+class te {
   restore() {
-    const t = j.localStorage.getItem(N);
+    const t = G.localStorage.getItem($);
     if (t === null) return null;
     const i = Number(t);
     return Number.isNaN(i) ? null : i;
   }
   save(t) {
-    j.localStorage.setItem(N, String(t));
+    G.localStorage.setItem($, String(t));
   }
 }
-const Z = d();
-class se {
+const j = d();
+class ee {
   constructor() {
     n(this, "scrollbar");
   }
   create(t = !1) {
-    this.scrollbar = Z.createElement("div");
-    const i = Z.createElement("span");
+    this.scrollbar = j.createElement("div");
+    const i = j.createElement("span");
     return i.className = "scrollbar__thumb", this.scrollbar.appendChild(i), this.scrollbar.classList.add("scrollbar"), t && this.scrollbar.classList.add("scrollbar--horizontal"), this.scrollbar;
   }
   append(t) {
@@ -627,7 +616,7 @@ class se {
     this.scrollbar.remove();
   }
 }
-class re {
+class ie {
   constructor(t, i = 1e3) {
     n(this, "timer", null);
     this.cb = t, this.delay = i;
@@ -641,8 +630,8 @@ class re {
     this.timer !== null && (clearTimeout(this.timer), this.timer = null);
   }
 }
-const p = d();
-class ne {
+const m = d();
+class se {
   constructor(t, i, s) {
     n(this, "activePointerId", null);
     n(this, "onTrackClick", (t) => {
@@ -662,7 +651,7 @@ class ne {
           this.elements.$scrollbar.setPointerCapture(t.pointerId);
         } catch {
         }
-        t.preventDefault(), p.addEventListener("pointermove", this.onPointerMove), p.addEventListener("pointerup", this.onPointerUp), p.addEventListener("pointercancel", this.onPointerUp);
+        t.preventDefault(), m.addEventListener("pointermove", this.onPointerMove), m.addEventListener("pointerup", this.onPointerUp), m.addEventListener("pointercancel", this.onPointerUp);
       }
     });
     n(this, "onPointerMove", (t) => {
@@ -671,7 +660,7 @@ class ne {
       this.controller.scrollTo(i, { immediate: !this.opts.isSmooth }), this.suppressNextClick = !0;
     });
     n(this, "onPointerUp", (t) => {
-      t.pointerId === this.activePointerId && (this.activePointerId = null, this.elements.$thumb.classList.remove("active"), p.removeEventListener("pointermove", this.onPointerMove), p.removeEventListener("pointerup", this.onPointerUp), p.removeEventListener("pointercancel", this.onPointerUp));
+      t.pointerId === this.activePointerId && (this.activePointerId = null, this.elements.$thumb.classList.remove("active"), m.removeEventListener("pointermove", this.onPointerMove), m.removeEventListener("pointerup", this.onPointerUp), m.removeEventListener("pointercancel", this.onPointerUp));
     });
     this.elements = t, this.controller = i, this.opts = s, this.init();
   }
@@ -695,7 +684,7 @@ class ne {
     return v((o - l) / a, 0, 1) * this.controller.limit;
   }
   destroy() {
-    if (this.elements.$scrollbar.removeEventListener("pointerdown", this.onPointerDown), this.elements.$scrollbar.removeEventListener("click", this.onTrackClick), p.removeEventListener("pointermove", this.onPointerMove), p.removeEventListener("pointerup", this.onPointerUp), p.removeEventListener("pointercancel", this.onPointerUp), this.activePointerId !== null) {
+    if (this.elements.$scrollbar.removeEventListener("pointerdown", this.onPointerDown), this.elements.$scrollbar.removeEventListener("click", this.onTrackClick), m.removeEventListener("pointermove", this.onPointerMove), m.removeEventListener("pointerup", this.onPointerUp), m.removeEventListener("pointercancel", this.onPointerUp), this.activePointerId !== null) {
       try {
         this.elements.$scrollbar.releasePointerCapture(this.activePointerId);
       } catch {
@@ -704,13 +693,13 @@ class ne {
     }
   }
 }
-const oe = d();
-class le {
+const re = d();
+class ne {
   constructor(t, i, s) {
     n(this, "$scrollbar");
     n(this, "$thumb");
     n(this, "thumbSize", 0);
-    n(this, "createScrollbar", new se());
+    n(this, "createScrollbar", new ee());
     n(this, "inactivity");
     n(this, "drag", null);
     n(this, "onMouseEnter", () => {
@@ -724,7 +713,7 @@ class le {
       const { track: t, minThumbSize: i } = this.readGeometry();
       this.updateThumbSize(t, i), this.updateThumbPosition(t), this.controller.isScrolling && this.inactivity.show();
     });
-    this.controller = t, this.raf = i, this.opts = s, this.inactivity = new re(this.setVisibility, ft), this.init();
+    this.controller = t, this.raf = i, this.opts = s, this.inactivity = new ie(this.setVisibility, ft), this.init();
   }
   get isHorizontal() {
     return this.controller.isHorizontal;
@@ -735,11 +724,11 @@ class le {
       this.isHorizontal ? t.paddingLeft : t.paddingTop
     ) || 0, s = parseFloat(
       this.isHorizontal ? t.paddingRight : t.paddingBottom
-    ) || 0, r = this.isHorizontal ? this.$scrollbar.clientWidth : this.$scrollbar.clientHeight, o = parseFloat(t.getPropertyValue("--es-thumb-min-size")), l = Number.isFinite(o) && o >= 0 ? o : Tt;
+    ) || 0, r = this.isHorizontal ? this.$scrollbar.clientWidth : this.$scrollbar.clientHeight, o = parseFloat(t.getPropertyValue("--es-thumb-min-size")), l = Number.isFinite(o) && o >= 0 ? o : bt;
     return { track: r - i - s, minThumbSize: l };
   }
   init() {
-    this.$scrollbar = this.createScrollbar.create(this.isHorizontal), this.$thumb = this.$scrollbar.querySelector(".scrollbar__thumb"), this.createScrollbar.append(oe.body), this.$scrollbar.addEventListener("mouseenter", this.onMouseEnter), this.drag = new ne(
+    this.$scrollbar = this.createScrollbar.create(this.isHorizontal), this.$thumb = this.$scrollbar.querySelector(".scrollbar__thumb"), this.createScrollbar.append(re.body), this.$scrollbar.addEventListener("mouseenter", this.onMouseEnter), this.drag = new se(
       { $scrollbar: this.$scrollbar, $thumb: this.$thumb },
       this.controller,
       this.opts
@@ -770,7 +759,7 @@ class le {
   }
 }
 const C = f();
-class de {
+class he {
   constructor(t = {}) {
     // --- Public state ---
     n(this, "animatedScroll", 0);
@@ -787,13 +776,13 @@ class de {
     // --- Dependencies ---
     n(this, "opts");
     n(this, "raf");
-    n(this, "animate", new Ht());
-    n(this, "emitter", new mt());
+    n(this, "animate", new Ot());
+    n(this, "emitter", new pt());
     n(this, "dimensions");
     n(this, "nativeScroll");
-    n(this, "reducedMotion", new ee());
+    n(this, "reducedMotion", new Qt());
     n(this, "mobile");
-    n(this, "persistence", new ie());
+    n(this, "persistence", new te());
     // --- Handlers ---
     n(this, "vsHandler", null);
     n(this, "keyboardHandler", null);
@@ -803,13 +792,13 @@ class de {
       const t = performance.now(), i = (t - (this._time || t)) * 1e-3;
       this._time = t, this.animate.advance(i);
     });
-    this.opts = xt(t), this.raf = this.opts.raf || ct, this.dimensions = new kt(this.wrapperElement, this.opts.content, {
+    this.opts = At(t), this.raf = this.opts.raf || ct, this.dimensions = new Rt(this.wrapperElement, this.opts.content, {
       autoResize: this.opts.autoResize
-    }), this.animatedScroll = this.targetScroll = this.getActualScroll(), this.opts.el.classList.add("es-smooth"), this.nativeScroll = new te(this.wrapperElement, this), this.mobile = new Qt(
+    }), this.animatedScroll = this.targetScroll = this.getActualScroll(), this.opts.el.classList.add("es-smooth"), this.nativeScroll = new Jt(this.wrapperElement, this), this.mobile = new Zt(
       this.opts.breakpoint,
       () => this.teardownDesktopHandlers(),
       () => this.setupDesktopHandlers()
-    ), this.mobile.isMobile || this.setupDesktopHandlers(), this.opts.anchors && (this.anchorHandler = new Vt(this, this.wrapperElement), this.anchorHandler.init()), this.opts.useKeyboardSmooth && (this.keyboardHandler = new Yt(this), this.keyboardHandler.init()), this.opts.saveScrollPosition && this.restoreScrollPosition(), this.opts.disabled && this.stop(), this.opts.autoRaf && this.raf.on(this.update);
+    ), this.mobile.isMobile || this.setupDesktopHandlers(), this.opts.anchors && (this.anchorHandler = new Nt(this, this.wrapperElement), this.anchorHandler.init()), this.opts.useKeyboardSmooth && (this.keyboardHandler = new Ft(this), this.keyboardHandler.init()), this.opts.saveScrollPosition && this.restoreScrollPosition(), this.opts.disabled && this.stop(), this.opts.autoRaf && this.raf.on(this.update);
   }
   // ---------------------------------------------------------------------------
   // Read-only projections (IScrollController)
@@ -887,7 +876,7 @@ class de {
    * Returns a detach function that removes the scroll listener.
    */
   attachScrollTrigger(t, i) {
-    return Jt(this, t, i);
+    return jt(this, t, i);
   }
   destroy() {
     var t, i;
@@ -912,7 +901,7 @@ class de {
   // Private — scrollTo pipeline
   // ---------------------------------------------------------------------------
   resolveTarget(t, i) {
-    const s = Nt(
+    const s = xt(
       t,
       i,
       this.limit,
@@ -925,7 +914,7 @@ class de {
     this.animatedScroll = this.targetScroll = t, this.setScroll(this.scroll), this.resetState(), this.notifyChange(), i == null || i(this);
   }
   performAnimated(t, i) {
-    const s = i.lerp ?? this.opts.lerp, r = i.duration ?? this.opts.duration, o = i.easing !== void 0 ? ot(i.easing) : this.opts.easing, l = i.lock ?? !1;
+    const s = i.lerp ?? this.opts.lerp, r = i.duration ?? this.opts.duration, o = i.easing !== void 0 ? nt(i.easing) : this.opts.easing, l = i.lock ?? !1;
     this.targetScroll = t, this.animate.fromTo(this.animatedScroll, t, {
       lerp: r ? void 0 : s,
       duration: r,
@@ -957,7 +946,7 @@ class de {
     });
   }
   setupDesktopHandlers() {
-    this.vsHandler || (this.vsHandler = new Zt(this), this.vsHandler.setup()), !this.scrollbar && this.opts.scrollbar.enabled && (this.scrollbar = new le(this, this.raf, this.opts.scrollbar));
+    this.vsHandler || (this.vsHandler = new Gt(this), this.vsHandler.setup()), !this.scrollbar && this.opts.scrollbar.enabled && (this.scrollbar = new ne(this, this.raf, this.opts.scrollbar));
   }
   teardownDesktopHandlers() {
     var t, i;
@@ -979,17 +968,17 @@ class de {
     });
   }
 }
-const me = {
+const ue = {
   syncTouch: !0,
   syncTouchLerp: 0.08,
   touchInertiaExponent: 2,
   maxTouchInertia: 3e3
 };
 export {
-  Jt as attachScrollTrigger,
-  de as default,
-  ue as easings,
-  me as iosMomentumPreset,
-  ot as resolveEasing,
-  D as smoothEasing
+  jt as attachScrollTrigger,
+  he as default,
+  ce as easings,
+  ue as iosMomentumPreset,
+  nt as resolveEasing,
+  A as smoothEasing
 };

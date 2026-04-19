@@ -1,6 +1,6 @@
 {
   "name": "@emotionagency/emotion-scroll",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "A batteries-included smooth scroll controller driving native scrollTop with a tunable custom scrollbar, GSAP ScrollTrigger integration, anchor links, keyboard navigation, and more",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
