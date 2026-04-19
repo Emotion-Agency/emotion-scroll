@@ -96,10 +96,23 @@ export class Animate {
   }
 
   fromTo(from: number, to: number, options: AnimateOptions): void {
-    this.momentumVelocity =
+    // Momentum blend-in is scoped to interruptions that actually benefit
+    // from it: a duration-based tween landing on top of an in-flight lerp
+    // (typical snap), or a direction reversal. For same-direction
+    // lerp→lerp handoffs (e.g. continuous wheel scrolling) we leave
+    // momentum at zero so the new tween's tail length matches the
+    // natural damp curve — adding velocity there just shortens the
+    // glide.
+    const incomingVelocity =
       this.isRunning && this.lastDeltaTime > 0
         ? (this.value - this.previousValue) / this.lastDeltaTime
         : 0
+    const isDurationTween = typeof options.duration === 'number'
+    const isDirectionReversal =
+      incomingVelocity !== 0 &&
+      Math.sign(to - from) !== Math.sign(incomingVelocity)
+    this.momentumVelocity =
+      isDurationTween || isDirectionReversal ? incomingVelocity : 0
 
     this.from = this.value = this.previousValue = from
     this.to = to
