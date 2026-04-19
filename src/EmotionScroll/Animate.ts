@@ -1,11 +1,6 @@
 import {clamp, damp} from '@emotionagency/utils'
 
-import {
-  LERP_COMPLETION_EPSILON,
-  LERP_RATE_PER_SECOND,
-  MOMENTUM_DECAY_RATE_PER_SECOND,
-  MOMENTUM_VELOCITY_EPSILON,
-} from './constants'
+import {LERP_COMPLETION_EPSILON, LERP_RATE_PER_SECOND} from './constants'
 import type {EasingFunction} from './types'
 
 interface AnimateOptions {
@@ -16,16 +11,6 @@ interface AnimateOptions {
   onUpdate?: (value: number, completed: boolean) => void
 }
 
-/**
- * Frame-rate independent tween supporting either exponential-lerp or
- * fixed-duration-with-easing modes.
- *
- * When a new `fromTo()` interrupts an in-flight tween, the inherited
- * per-second velocity is captured and added to subsequent frames while
- * it decays exponentially toward zero. This prevents the visible
- * deceleration spike that would otherwise occur when a programmatic
- * scrollTo (e.g. a snap) lands on top of a user-driven lerp.
- */
 export class Animate {
   isRunning = false
   value = 0
@@ -38,16 +23,8 @@ export class Animate {
   private easing?: EasingFunction
   private onUpdate?: (value: number, completed: boolean) => void
 
-  // Momentum carryover state
-  private previousValue = 0
-  private lastDeltaTime = 0
-  private momentumVelocity = 0
-
   advance(deltaTime: number): void {
     if (!this.isRunning) return
-
-    this.previousValue = this.value
-    this.lastDeltaTime = deltaTime
 
     let completed = false
 
@@ -59,33 +36,11 @@ export class Animate {
       this.value = this.from + (this.to - this.from) * easedProgress
     } else if (this.lerp) {
       this.value = damp(this.value, this.to, this.lerp * LERP_RATE_PER_SECOND, deltaTime)
-    } else {
-      this.value = this.to
-      completed = true
-    }
-
-    if (this.momentumVelocity !== 0) {
-      this.momentumVelocity = damp(
-        this.momentumVelocity,
-        0,
-        MOMENTUM_DECAY_RATE_PER_SECOND,
-        deltaTime,
-      )
-      this.value += this.momentumVelocity * deltaTime
-      if (Math.abs(this.momentumVelocity) < MOMENTUM_VELOCITY_EPSILON) {
-        this.momentumVelocity = 0
+      if (Math.abs(this.value - this.to) < LERP_COMPLETION_EPSILON) {
+        this.value = this.to
+        completed = true
       }
-    }
-
-    // Lerp-mode completion is deferred until momentum has settled so the
-    // epsilon snap doesn't fire while the blend is still contributing.
-    if (
-      !completed &&
-      this.lerp &&
-      !this.duration &&
-      this.momentumVelocity === 0 &&
-      Math.abs(this.value - this.to) < LERP_COMPLETION_EPSILON
-    ) {
+    } else {
       this.value = this.to
       completed = true
     }
@@ -96,25 +51,7 @@ export class Animate {
   }
 
   fromTo(from: number, to: number, options: AnimateOptions): void {
-    // Momentum blend-in is scoped to interruptions that actually benefit
-    // from it: a duration-based tween landing on top of an in-flight lerp
-    // (typical snap), or a direction reversal. For same-direction
-    // lerp→lerp handoffs (e.g. continuous wheel scrolling) we leave
-    // momentum at zero so the new tween's tail length matches the
-    // natural damp curve — adding velocity there just shortens the
-    // glide.
-    const incomingVelocity =
-      this.isRunning && this.lastDeltaTime > 0
-        ? (this.value - this.previousValue) / this.lastDeltaTime
-        : 0
-    const isDurationTween = typeof options.duration === 'number'
-    const isDirectionReversal =
-      incomingVelocity !== 0 &&
-      Math.sign(to - from) !== Math.sign(incomingVelocity)
-    this.momentumVelocity =
-      isDurationTween || isDirectionReversal ? incomingVelocity : 0
-
-    this.from = this.value = this.previousValue = from
+    this.from = this.value = from
     this.to = to
     this.lerp = options.lerp
     this.duration = options.duration
@@ -128,6 +65,5 @@ export class Animate {
 
   stop(): void {
     this.isRunning = false
-    this.momentumVelocity = 0
   }
 }
