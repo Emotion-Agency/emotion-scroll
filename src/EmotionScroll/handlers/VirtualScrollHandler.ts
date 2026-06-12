@@ -1,6 +1,7 @@
 import {clamp} from '@emotionagency/utils'
 
 import {getDocument, getWindow} from 'ssr-window'
+import {MAX_FRAME_DT_FACTOR} from '../constants'
 import {FingerVelocityTracker} from '../internal/FingerVelocityTracker'
 import {normalizeWheel} from '../internal/normalizeWheel'
 import type {ResolvedOpts} from '../opts'
@@ -44,6 +45,7 @@ export class VirtualScrollHandler {
   private readonly finger = new FingerVelocityTracker()
   private lastTouchX = 0
   private lastTouchY = 0
+  private pendingWheelDelta = 0
 
   constructor(private readonly host: ScrollHost) {}
 
@@ -60,6 +62,42 @@ export class VirtualScrollHandler {
     this.bindInput(false)
     this.eventTarget = null
     this.finger.reset()
+    this.pendingWheelDelta = 0
+  }
+
+  /**
+   * Apply the wheel input accumulated since the previous frame. Clamping
+   * the per-frame total (instead of each event) keeps scroll speed
+   * independent of how many events a device fires per second; the cap is
+   * scaled by the actual frame dt so 120Hz displays don't get a 2× ceiling.
+   * Input beyond the cap carries over to subsequent frames instead of
+   * being dropped, so a legitimate oversized intent (a page-mode tick is
+   * a full viewport) still travels its whole distance — only the rate is
+   * limited. Called from the host's RAF update before the animation
+   * advances.
+   */
+  flush(deltaTime: number): void {
+    const pending = this.pendingWheelDelta
+    if (pending === 0) return
+
+    const {host} = this
+    const {opts} = host
+    if (host.isStopped || host.isLocked) {
+      this.pendingWheelDelta = 0
+      return
+    }
+
+    const dtFactor =
+      deltaTime > 0 ? Math.min(deltaTime * 60, MAX_FRAME_DT_FACTOR) : 1
+    const cap = opts.maxScrollDelta * dtFactor
+    const delta = clamp(pending, -cap, cap)
+    this.pendingWheelDelta = pending - delta
+
+    host.scrollTo(host.targetScroll + delta, {
+      lerp: opts.lerp,
+      duration: opts.duration,
+      easing: opts.easing,
+    })
   }
 
   private bindInput(attach: boolean): void {
@@ -101,6 +139,7 @@ export class VirtualScrollHandler {
     if (opts.syncTouch && !host.isStopped && !host.isLocked) {
       host.stopAnimation()
       host.targetScroll = host.animatedScroll
+      this.pendingWheelDelta = 0
     }
   }
 
@@ -199,20 +238,24 @@ export class VirtualScrollHandler {
       delta *= opts.wheelMultiplier
     }
 
-    delta = clamp(delta, -opts.maxScrollDelta, opts.maxScrollDelta)
-
     if (!opts.overscroll || opts.infinite || this.isWithinBounds(delta)) {
       if ('cancelable' in event && event.cancelable) {
         event.preventDefault()
       }
     }
 
-    const isSyncTouch = isTouch && opts.syncTouch
-    host.scrollTo(host.targetScroll + delta, {
-      ...(isSyncTouch
-        ? {lerp: 1}
-        : {lerp: opts.lerp, duration: opts.duration, easing: opts.easing}),
-    })
+    if (isWheel) {
+      this.pendingWheelDelta += delta
+      return
+    }
+
+    // Touch deltas telescope to the actual finger displacement, so event
+    // rate can't affect speed — apply immediately (buffering would also
+    // race with the inertia kick-off in onTouchEnd). The clamp only
+    // guards against anomalous single jumps.
+    delta = clamp(delta, -opts.maxScrollDelta, opts.maxScrollDelta)
+
+    host.scrollTo(host.targetScroll + delta, {lerp: 1})
   }
 
   private isWithinBounds(delta: number): boolean {

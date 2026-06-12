@@ -21,7 +21,9 @@ assemble them yourself.
   clicks, smooth-scrolls, and updates the URL via `history.pushState`.
 - **Keyboard scrolling.** Arrows, Page Up/Down, Home/End, and Tab focus
   jumps animate with the same easing as everything else.
-- **Mobile breakpoint fallback.** Flip off smooth scroll below a width
+- **Mobile fallback by width or input type.** Flip off smooth scroll
+  below a viewport width, on a media query like
+  `'(hover: none) and (pointer: coarse)'`, or via a custom predicate —
   without re-instantiating.
 - **Scroll position persistence.** Opt-in `saveScrollPosition` restores
   across reloads from `localStorage`.
@@ -73,9 +75,9 @@ scroll.destroy()
 | `easing`               | `(t: number) => number`                | `undefined`                | Easing function, used with `duration`                            |
 | `touchMultiplier`      | `number`                               | `1`                        | Touch input multiplier                                           |
 | `wheelMultiplier`      | `number`                               | `1`                        | Wheel input multiplier                                           |
-| `maxScrollDelta`       | `number`                               | `120`                      | Max pixels per wheel event (prevents jarring jumps)              |
+| `maxScrollDelta`       | `number`                               | `360`                      | Max accumulated wheel input per frame @60fps (prevents jarring jumps) |
 | `scrollbar`            | `boolean`                              | `true`                     | Show custom scrollbar                                            |
-| `breakpoint`           | `number \| null`                       | `null`                     | Viewport width below which smooth scroll is disabled             |
+| `breakpoint`           | `number \| string \| (() => boolean) \| null` | `null`              | Disable smooth scroll by viewport width, media query string (e.g. `'(hover: none) and (pointer: coarse)'`), or custom predicate |
 | `useKeyboardSmooth`    | `boolean`                              | `true`                     | Enable keyboard navigation (arrows, Page Up/Down, Home/End, Tab) |
 | `keyboardScrollStep`   | `number`                               | `120`                      | Arrow key scroll distance in pixels                              |
 | `disabled`             | `boolean`                              | `false`                    | Start in disabled state                                          |
@@ -375,7 +377,6 @@ Only same-page hash links are intercepted. External links and links to non-exist
 
 Built and maintained by [Emotion Agency](https://www.emotion-agency.com/en/).
 
-Input normalisation is powered by [`virtual-scroll`](https://github.com/ayamflow/virtual-scroll).
 The animated-position / lerp model and the syncTouch inertia approach
 draw inspiration from [Lenis](https://github.com/darkroomengineering/lenis) —
 if you prefer a minimal, feature-light smooth scroller without the

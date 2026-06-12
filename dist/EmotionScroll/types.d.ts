@@ -69,12 +69,19 @@ export interface IOpts {
     touchMultiplier?: number;
     /** Wheel input multiplier. */
     wheelMultiplier?: number;
-    /** Max pixels per single wheel delta (prevents jarring jumps). */
+    /** Max accumulated wheel input applied per frame, normalized to 60fps
+     *  (prevents jarring jumps). Scaled by the actual frame dt, so the
+     *  px/sec ceiling is the same on high-refresh displays. */
     maxScrollDelta?: number;
     /** Show custom scrollbar. Pass an object to configure (e.g. `{ isSmooth: false }`). */
     scrollbar?: boolean | IScrollbarOpts;
-    /** Viewport width below which smooth scroll is disabled. `null` = always enabled. */
-    breakpoint?: number | null;
+    /** When matched, smooth scroll is disabled in favour of native scroll.
+     *  - `number` — viewport width in px below which smooth scroll is off
+     *  - `string` — media query, e.g. `'(hover: none) and (pointer: coarse)'`
+     *    (re-evaluated via its `change` event)
+     *  - `function` — custom predicate, re-evaluated on window resize
+     *  - `null` — smooth scroll always enabled */
+    breakpoint?: number | string | (() => boolean) | null;
     /** Enable keyboard navigation (arrows, Page Up/Down, Home/End, Tab). */
     useKeyboardSmooth?: boolean;
     /** Scroll distance for arrow keys in pixels. */

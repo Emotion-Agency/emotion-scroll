@@ -230,6 +230,7 @@ export default class EmotionScroll implements IScrollController {
     const now = performance.now()
     const deltaTime = (now - (this._time || now)) * 0.001
     this._time = now
+    this.vsHandler?.flush(deltaTime)
     this.animate.advance(deltaTime)
   }
 
