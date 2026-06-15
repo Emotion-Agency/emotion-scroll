@@ -8,6 +8,7 @@ const window = getWindow()
 interface DimensionsOptions {
   autoResize?: boolean
   debounceDelay?: number
+  onResize?: () => void
 }
 
 export class Dimensions {
@@ -23,10 +24,17 @@ export class Dimensions {
   constructor(
     private wrapper: HTMLElement | Window,
     private content: HTMLElement,
-    {autoResize = true, debounceDelay = DIMENSIONS_DEBOUNCE_MS}: DimensionsOptions = {}
+    {
+      autoResize = true,
+      debounceDelay = DIMENSIONS_DEBOUNCE_MS,
+      onResize,
+    }: DimensionsOptions = {}
   ) {
     if (autoResize) {
-      this.debouncedResize = debounce(this.resize, debounceDelay)
+      this.debouncedResize = debounce(() => {
+        this.resize()
+        onResize?.()
+      }, debounceDelay)
 
       if (this.wrapper instanceof Window) {
         window.addEventListener('resize', this.debouncedResize)

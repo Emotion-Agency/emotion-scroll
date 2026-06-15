@@ -72,6 +72,7 @@ export default class EmotionScroll implements IScrollController {
 
     this.dimensions = new Dimensions(this.wrapperElement, this.opts.content, {
       autoResize: this.opts.autoResize,
+      onResize: () => this.syncToDimensions(),
     })
 
     this.animatedScroll = this.targetScroll = this.getActualScroll()
@@ -205,8 +206,7 @@ export default class EmotionScroll implements IScrollController {
 
   resize(): void {
     this.dimensions.resize()
-    this.animatedScroll = this.targetScroll = this.getActualScroll()
-    this.notifyChange()
+    this.syncToDimensions()
   }
 
   reset(): void {
@@ -392,6 +392,11 @@ export default class EmotionScroll implements IScrollController {
 
     this.lastVelocity = this.velocity = 0
     this.animate.stop()
+  }
+
+  private syncToDimensions(): void {
+    this.animatedScroll = this.targetScroll = this.getActualScroll()
+    this.notifyChange()
   }
 
   private notifyChange(): void {

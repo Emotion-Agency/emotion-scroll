@@ -1,6 +1,17 @@
 # Changelog
 
-## 4.0.0 (unreleased)
+## 4.0.1
+
+### Fixed
+
+- **Auto-resize now reaches the controller.** The internal `ResizeObserver`
+  updated cached dimensions but never re-clamped the scroll position or
+  emitted a `scroll` event, so dynamically added/removed content left
+  `progress`, ScrollTrigger and other subscribers stale until the next
+  manual scroll. `Dimensions` now reports back to `EmotionScroll`, which
+  syncs and notifies on every observed resize.
+
+## 4.0.0
 
 Scroll-speed normalization across input devices. No API signatures were
 removed, but **default feel changes** — hence the major bump.

@@ -1,6 +1,7 @@
 interface DimensionsOptions {
     autoResize?: boolean;
     debounceDelay?: number;
+    onResize?: () => void;
 }
 export declare class Dimensions {
     private wrapper;
@@ -12,7 +13,7 @@ export declare class Dimensions {
     private debouncedResize?;
     private wrapperResizeObserver?;
     private contentResizeObserver?;
-    constructor(wrapper: HTMLElement | Window, content: HTMLElement, { autoResize, debounceDelay }?: DimensionsOptions);
+    constructor(wrapper: HTMLElement | Window, content: HTMLElement, { autoResize, debounceDelay, onResize, }?: DimensionsOptions);
     get limit(): {
         x: number;
         y: number;

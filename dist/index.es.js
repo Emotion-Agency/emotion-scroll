@@ -70,7 +70,7 @@ var Z = { exports: {} };
   });
 })(Z);
 var dt = Z.exports;
-const pt = /* @__PURE__ */ ut(dt), ft = 400, mt = 1e3, gt = 250, vt = 0.5, St = 60, bt = 100 / 3, yt = 2, Tt = 60, $ = "emotion-scroll-position", Et = 1.5, wt = 0.1, Lt = 0.075, Mt = 1.7, _t = 1, zt = 1, Ht = 360, Pt = 120, Ot = 1e3;
+const pt = /* @__PURE__ */ ut(dt), ft = 400, mt = 1e3, gt = 250, vt = 0.5, St = 60, bt = 100 / 3, yt = 2, Tt = 60, $ = "emotion-scroll-position", Et = 1.5, wt = 0.1, Lt = 0.075, Mt = 1.7, _t = 1, Ht = 1, Pt = 360, zt = 120, Ot = 1e3;
 class Rt {
   constructor() {
     n(this, "isRunning", !1);
@@ -114,7 +114,11 @@ function kt(i, t) {
 }
 const E = d();
 class Ct {
-  constructor(t, e, { autoResize: s = !0, debounceDelay: r = gt } = {}) {
+  constructor(t, e, {
+    autoResize: s = !0,
+    debounceDelay: r = gt,
+    onResize: o
+  } = {}) {
     n(this, "width", 0);
     n(this, "height", 0);
     n(this, "scrollWidth", 0);
@@ -125,7 +129,9 @@ class Ct {
     n(this, "resize", () => {
       this.wrapper instanceof Window ? (this.width = E.innerWidth, this.height = E.innerHeight, this.scrollWidth = this.content.scrollWidth, this.scrollHeight = this.content.scrollHeight) : (this.width = this.wrapper.clientWidth, this.height = this.wrapper.clientHeight, this.scrollWidth = this.wrapper.scrollWidth, this.scrollHeight = this.wrapper.scrollHeight);
     });
-    this.wrapper = t, this.content = e, s && (this.debouncedResize = kt(this.resize, r), this.wrapper instanceof Window ? E.addEventListener("resize", this.debouncedResize) : typeof ResizeObserver < "u" && (this.wrapperResizeObserver = new ResizeObserver(this.debouncedResize), this.wrapperResizeObserver.observe(this.wrapper)), typeof ResizeObserver < "u" && (this.contentResizeObserver = new ResizeObserver(this.debouncedResize), this.contentResizeObserver.observe(this.content))), this.resize();
+    this.wrapper = t, this.content = e, s && (this.debouncedResize = kt(() => {
+      this.resize(), o == null || o();
+    }, r), this.wrapper instanceof Window ? E.addEventListener("resize", this.debouncedResize) : typeof ResizeObserver < "u" && (this.wrapperResizeObserver = new ResizeObserver(this.debouncedResize), this.wrapperResizeObserver.observe(this.wrapper)), typeof ResizeObserver < "u" && (this.contentResizeObserver = new ResizeObserver(this.debouncedResize), this.contentResizeObserver.observe(this.content))), this.resize();
   }
   get limit() {
     return {
@@ -138,14 +144,14 @@ class Ct {
     (t = this.wrapperResizeObserver) == null || t.disconnect(), (e = this.contentResizeObserver) == null || e.disconnect(), this.wrapper instanceof Window && this.debouncedResize && E.removeEventListener("resize", this.debouncedResize);
   }
 }
-const M = (i) => i, D = (i) => {
+const M = (i) => i, I = (i) => {
   const t = 1 - i;
   return 1 - t * t * t * (1 - i * 0.6);
 }, R = (i) => ({
   in: (t) => t ** i,
   out: (t) => 1 - (1 - t) ** i,
   inOut: (t) => t < 0.5 ? 2 ** (i - 1) * t ** i : 1 - (-2 * t + 2) ** i / 2
-}), _ = R(2), z = R(3), H = R(4), P = R(5), J = {
+}), _ = R(2), H = R(3), P = R(4), z = R(5), J = {
   in: (i) => i === 0 ? 0 : 2 ** (10 * i - 10),
   out: (i) => i === 1 ? 1 : 1 - 2 ** (-10 * i),
   inOut: (i) => i === 0 ? 0 : i === 1 ? 1 : i < 0.5 ? 2 ** (20 * i - 10) / 2 : (2 - 2 ** (-20 * i + 10)) / 2
@@ -184,30 +190,30 @@ const M = (i) => i, D = (i) => {
 }, ue = {
   linear: M,
   none: M,
-  smooth: D,
+  smooth: I,
   power1: _,
-  power2: z,
-  power3: H,
-  power4: P,
+  power2: H,
+  power3: P,
+  power4: z,
   quad: _,
-  cubic: z,
-  quart: H,
-  quint: P,
+  cubic: H,
+  quart: P,
+  quint: z,
   expo: J,
   sine: tt,
   circ: et,
   back: it,
   elastic: st,
   bounce: rt
-}, It = {
+}, Dt = {
   power1: _,
-  power2: z,
-  power3: H,
-  power4: P,
+  power2: H,
+  power3: P,
+  power4: z,
   quad: _,
-  cubic: z,
-  quart: H,
-  quint: P,
+  cubic: H,
+  quart: P,
+  quint: z,
   expo: J,
   sine: tt,
   circ: et,
@@ -216,15 +222,15 @@ const M = (i) => i, D = (i) => {
   bounce: rt
 };
 var Q;
-const Dt = typeof process > "u" || ((Q = process.env) == null ? void 0 : Q.NODE_ENV) !== "production", F = /* @__PURE__ */ new Set();
+const It = typeof process > "u" || ((Q = process.env) == null ? void 0 : Q.NODE_ENV) !== "production", F = /* @__PURE__ */ new Set();
 function X(i, t) {
-  !Dt || F.has(t) || (F.add(t), console.warn(`[emotion-scroll] ${i}`));
+  !It || F.has(t) || (F.add(t), console.warn(`[emotion-scroll] ${i}`));
 }
 function nt(i) {
   if (typeof i != "string") return i;
   if (i === "none" || i === "linear") return M;
-  if (i === "smooth") return D;
-  const [t, e = "out"] = i.split("."), s = It[t];
+  if (i === "smooth") return I;
+  const [t, e = "out"] = i.split("."), s = Dt[t];
   if (!s)
     return X(
       `Unknown easing "${i}". Falling back to linear.`,
@@ -249,7 +255,7 @@ function At(i) {
 function xt(i = {}) {
   const t = i.orientation ?? "vertical";
   let e = i.duration ?? void 0, s = nt(i.easing);
-  return typeof e == "number" && typeof s != "function" ? s = D : typeof s == "function" && typeof e != "number" && (e = Et), {
+  return typeof e == "number" && typeof s != "function" ? s = I : typeof s == "function" && typeof e != "number" && (e = Et), {
     el: i.el ?? q.documentElement,
     content: i.content ?? i.el ?? q.documentElement,
     orientation: t,
@@ -261,13 +267,13 @@ function xt(i = {}) {
     lerp: i.lerp ?? wt,
     duration: e,
     easing: s,
-    touchMultiplier: i.touchMultiplier ?? zt,
+    touchMultiplier: i.touchMultiplier ?? Ht,
     wheelMultiplier: i.wheelMultiplier ?? _t,
-    maxScrollDelta: i.maxScrollDelta ?? Ht,
+    maxScrollDelta: i.maxScrollDelta ?? Pt,
     scrollbar: At(i.scrollbar),
     breakpoint: i.breakpoint ?? null,
     useKeyboardSmooth: i.useKeyboardSmooth ?? !0,
-    keyboardScrollStep: i.keyboardScrollStep ?? Pt,
+    keyboardScrollStep: i.keyboardScrollStep ?? zt,
     disabled: i.disabled ?? !1,
     raf: i.raf ?? null,
     autoRaf: i.autoRaf ?? !0,
@@ -801,7 +807,7 @@ class le {
     (t = this.drag) == null || t.destroy(), this.drag = null, this.$scrollbar.removeEventListener("mouseenter", this.onMouseEnter), this.createScrollbar.destroy(), this.inactivity.destroy(), this.raf.off(this.onFrame);
   }
 }
-const I = d();
+const D = d();
 class de {
   constructor(t = {}) {
     // --- Public state ---
@@ -837,7 +843,8 @@ class de {
       this._time = t, (s = this.vsHandler) == null || s.flush(e), this.animate.advance(e);
     });
     this.opts = xt(t), this.raf = this.opts.raf || ht, this.dimensions = new Ct(this.wrapperElement, this.opts.content, {
-      autoResize: this.opts.autoResize
+      autoResize: this.opts.autoResize,
+      onResize: () => this.syncToDimensions()
     }), this.animatedScroll = this.targetScroll = this.getActualScroll(), this.opts.el.classList.add("es-smooth"), this.nativeScroll = new te(this.wrapperElement, this), this.mobile = new Jt(
       this.opts.breakpoint,
       () => this.teardownDesktopHandlers(),
@@ -875,7 +882,7 @@ class de {
     return this.mobile.isMobile;
   }
   get wrapperElement() {
-    return this.isWindowScroll ? I : this.opts.el;
+    return this.isWindowScroll ? D : this.opts.el;
   }
   // ---------------------------------------------------------------------------
   // Public API
@@ -908,7 +915,7 @@ class de {
     this._isStopped || (this.resetState(), this._isStopped = !0, this.opts.el.classList.add("e-fixed"), this.notifyChange());
   }
   resize() {
-    this.dimensions.resize(), this.animatedScroll = this.targetScroll = this.getActualScroll(), this.notifyChange();
+    this.dimensions.resize(), this.syncToDimensions();
   }
   reset() {
     var t;
@@ -936,7 +943,7 @@ class de {
     this.animate.stop();
   }
   getActualScroll() {
-    return this.isWindowScroll ? this.isHorizontal ? I.scrollX : I.scrollY : this.isHorizontal ? this.opts.el.scrollLeft : this.opts.el.scrollTop;
+    return this.isWindowScroll ? this.isHorizontal ? D.scrollX : D.scrollY : this.isHorizontal ? this.opts.el.scrollLeft : this.opts.el.scrollTop;
   }
   onScrollChanged() {
     this.notifyChange();
@@ -1003,6 +1010,9 @@ class de {
   resetState() {
     this._isLocked = !1, this.isScrolling = !1, this.opts.infinite ? this.animatedScroll = this.targetScroll = this.scroll : this.animatedScroll = this.targetScroll = this.getActualScroll(), this.lastVelocity = this.velocity = 0, this.animate.stop();
   }
+  syncToDimensions() {
+    this.animatedScroll = this.targetScroll = this.getActualScroll(), this.notifyChange();
+  }
   notifyChange() {
     this.emitter.emit("scroll", {
       position: this.scroll,
@@ -1024,5 +1034,5 @@ export {
   ue as easings,
   pe as iosMomentumPreset,
   nt as resolveEasing,
-  D as smoothEasing
+  I as smoothEasing
 };

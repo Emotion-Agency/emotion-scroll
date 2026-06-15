@@ -69,6 +69,7 @@ export default class EmotionScroll implements IScrollController {
     private teardownDesktopHandlers;
     private restoreScrollPosition;
     private resetState;
+    private syncToDimensions;
     private notifyChange;
 }
 export {};
