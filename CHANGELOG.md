@@ -4,12 +4,21 @@
 
 ### Fixed
 
+- **Auto-resize now detects content growth in element scroll.** When
+  `content` was omitted it defaulted to `el`, so the `ResizeObserver`
+  watched the fixed-height overflow container — whose box never changes
+  when inner content grows — and dynamically added/removed content went
+  undetected. `content` now defaults to `el`'s first element child for
+  element scroll (the inner wrapper that actually resizes); window scroll
+  and an explicit `content` are unchanged. Pass `content` explicitly for
+  layouts with multiple top-level children.
 - **Auto-resize now reaches the controller.** The internal `ResizeObserver`
   updated cached dimensions but never re-clamped the scroll position or
-  emitted a `scroll` event, so dynamically added/removed content left
-  `progress`, ScrollTrigger and other subscribers stale until the next
-  manual scroll. `Dimensions` now reports back to `EmotionScroll`, which
-  syncs and notifies on every observed resize.
+  emitted a `scroll` event, so on resize `progress`, ScrollTrigger and
+  other subscribers stayed stale until the next manual scroll. `Dimensions`
+  now reports back to `EmotionScroll`, which re-clamps the position into the
+  new limit and notifies on every observed resize (non-destructively — an
+  in-flight smooth animation is left running).
 
 ## 4.0.0
 

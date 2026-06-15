@@ -206,7 +206,8 @@ export default class EmotionScroll implements IScrollController {
 
   resize(): void {
     this.dimensions.resize()
-    this.syncToDimensions()
+    this.animatedScroll = this.targetScroll = this.getActualScroll()
+    this.notifyChange()
   }
 
   reset(): void {
@@ -395,7 +396,11 @@ export default class EmotionScroll implements IScrollController {
   }
 
   private syncToDimensions(): void {
-    this.animatedScroll = this.targetScroll = this.getActualScroll()
+    if (!this.opts.infinite) {
+      const limit = this.limit
+      this.targetScroll = clamp(this.targetScroll, 0, limit)
+      this.animatedScroll = clamp(this.animatedScroll, 0, limit)
+    }
     this.notifyChange()
   }
 

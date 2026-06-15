@@ -38,6 +38,20 @@ function resolveScrollbarOpts(
   }
 }
 
+function resolveContent(content: IOpts['content'], el: HTMLElement): HTMLElement {
+  if (content) return content
+
+  // Window scroll: the document element is both viewport and content.
+  if (el === document.documentElement) return el
+
+  // Element scroll: the `el` is a fixed-height overflow container, so a
+  // ResizeObserver on it never fires when the inner content grows. Observe
+  // the inner wrapper that actually changes height instead. Falls back to
+  // `el` for childless containers; pass `content` explicitly for layouts
+  // with multiple top-level children.
+  return (el.firstElementChild as HTMLElement | null) ?? el
+}
+
 export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
   const orientation = opts.orientation ?? 'vertical'
 
@@ -54,9 +68,11 @@ export function resolveOpts(opts: IOpts = {}): ResolvedOpts {
     duration = DEFAULT_EASED_DURATION_SEC
   }
 
+  const el = opts.el ?? document.documentElement
+
   return {
-    el: opts.el ?? document.documentElement,
-    content: opts.content ?? opts.el ?? document.documentElement,
+    el,
+    content: resolveContent(opts.content, el),
     orientation,
     gestureOrientation:
       opts.gestureOrientation ??
